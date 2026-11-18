@@ -32,7 +32,7 @@ function Pie({
         Cancelar
       </button>
       <button type="submit" disabled={pendiente} className={boton.primario}>
-        {pendiente ? "Guardando…" : "Guardar cambios"}
+        {pendiente ? "Guardando..." : "Guardar cambios"}
       </button>
     </div>
   );
