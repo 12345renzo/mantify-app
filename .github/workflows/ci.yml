@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    env:
+      # Valores ficticios solo para compilar; la app no llama a Supabase en el build.
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon
+      SUPABASE_SERVICE_ROLE_KEY: ci-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+      # Regla base: SQL concatenado con variables. Heurística; se afina con las consultas reales.
+      - name: Bloquear SQL concatenado
+        run: |
+          if grep -rnE "(SELECT|INSERT|UPDATE|DELETE)[^;]*[\"'\`][[:space:]]*\+|\\$\\{[^}]*\\}[^;]*(SELECT|INSERT|UPDATE|DELETE)" src tests; then
+            echo "Se encontró SQL concatenado. Usa consultas parametrizadas."; exit 1
+          fi
+
+  dependencias:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high

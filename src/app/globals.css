@@ -1,0 +1,430 @@
+@import "tailwindcss";
+
+/* El tema lo fija data-theme en <html> (script en layout.tsx); dark: de Tailwind sigue a ese atributo. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Dirección visual: "panel de instrumentos".
+ * Porcelana fría para el trabajo diario, verde profundo para el chrome y lima
+ * eléctrica como única señal. Bordes de un pixel, números tabulares y mucho
+ * aire: la app se lee como una consola de flota, no como una landing.
+ */
+:root {
+  --bg: #edf2ef;
+  --surface: #ffffff;
+  --surface-2: #f3f7f5;
+  --surface-3: #e7eeea;
+  --border: #dce5e0;
+  --border-strong: #c1d0c7;
+  --fg: #0b1712;
+  --muted: #5c6f65;
+  --primary: #067a57;
+  --primary-hover: #056346;
+  --primary-fg: #f2fff9;
+  --primary-soft: #d7f4e8;
+  --accent: #4d8c0b;
+  --accent-soft: #edf9d5;
+
+  --lime: #b9f227;
+  --lime-soft: #f0fdd0;
+
+  --ok: #11743f;
+  --ok-soft: #dcf5e6;
+  --warn: #996004;
+  --warn-soft: #fdf1d2;
+  --grace: #a8490f;
+  --grace-soft: #fde9dc;
+  --bad: #bb2c37;
+  --bad-soft: #fde3e5;
+
+  /* Un color por módulo: el icono del sidebar y el del encabezado usan el mismo. */
+  --mod-plataforma: #067a57;
+  --mod-personas: #6b4fd8;
+  --mod-catalogos: #0e7490;
+  --mod-equipos: #4d7c0f;
+  --mod-mantenimiento: #c2410c;
+  --mod-preventivos: #a16207;
+  --mod-paradas: #be123c;
+  --mod-engrase: #2563eb;
+  --mod-neumaticos: #475569;
+  --mod-reportes: #7c5a3c;
+
+  /* Chrome lateral de día: porcelana verde, tinta profunda y señal esmeralda. */
+  --sidebar: #f7faf8;
+  --sidebar-2: #ffffff;
+  --sidebar-3: #eef4f0;
+  --sidebar-border: #dbe7e0;
+  --sidebar-fg: #10251c;
+  --sidebar-muted: #5b7064;
+  --sidebar-signal: #067a57;
+  --sidebar-glow: #7fd8bc;
+  --sidebar-card: #ffffff;
+  --sidebar-hover: #e8f1ec;
+  --sidebar-chip: #f1f7f3;
+  --sidebar-logo-bg: #067a57;
+  --sidebar-logo-fg: #f2fff9;
+  --sidebar-logo-dot: #c9f75a;
+  --sidebar-logo-ring: #f7faf8;
+
+  /* Panel fuerte: superficies de marca que respiran en ambos temas. */
+  --fuerte-1: #f1faf5;
+  --fuerte-2: #e6f5ec;
+  --fuerte-3: #dbeee3;
+  --fuerte-border: #c2dccd;
+  --fuerte-fg: #0b2a1e;
+  --fuerte-muted: #4c6c5f;
+  --fuerte-line: #cfe6da;
+  --fuerte-chip: #f8fcf9;
+  --fuerte-chip-border: #d5e8de;
+  --fuerte-accent: #067a57;
+  --fuerte-accent-soft: #d3f0e3;
+  --fuerte-badge-bg: #c9f75a;
+  --fuerte-badge-fg: #22380a;
+  --fuerte-cta: #067a57;
+  --fuerte-cta-hover: #056346;
+  --fuerte-cta-fg: #f2fff9;
+  --fuerte-top-1: #067a57;
+  --fuerte-top-2: #8fc51c;
+  --fuerte-track: #cfe4d8;
+  --fuerte-bar-1: #0f9d74;
+  --fuerte-bar-2: #7fb520;
+  --fuerte-bar-warn-1: #d9a23a;
+  --fuerte-bar-warn-2: #d2683f;
+  --fuerte-warn-bg: #fdf3da;
+  --fuerte-warn-border: #ecd29a;
+  --fuerte-warn-fg: #7a5208;
+  --fuerte-point-1: #067a57;
+  --fuerte-point-2: #0e7490;
+  --fuerte-point-3: #996004;
+  --fuerte-logo-dot: #c9f75a;
+
+  --shadow-card:
+    0 1px 2px rgb(6 36 26 / 0.05), 0 14px 34px -24px rgb(6 36 26 / 0.32);
+  --shadow-pop:
+    0 1px 2px rgb(6 36 26 / 0.06), 0 26px 64px -30px rgb(6 36 26 / 0.4);
+  --radius-panel: 1.25rem;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #07110d;
+  --surface: #0c1813;
+  --surface-2: #11211a;
+  --surface-3: #172a21;
+  --border: #1d332a;
+  --border-strong: #2d4a3c;
+  --fg: #e9f2ed;
+  --muted: #8ba79b;
+  --primary: #57e0ad;
+  --primary-hover: #7bf0c4;
+  --primary-fg: #04130c;
+  --primary-soft: #0d3226;
+  --accent: #c3f155;
+  --accent-soft: #24330d;
+
+  --lime: #c9f75a;
+  --lime-soft: #1d2b0b;
+
+  --ok: #5fe0a0;
+  --ok-soft: #0c2e1e;
+  --warn: #f2c15c;
+  --warn-soft: #2e2410;
+  --grace: #f79a63;
+  --grace-soft: #301b11;
+  --bad: #ff8b93;
+  --bad-soft: #34141a;
+
+  --mod-plataforma: #5fe0ad;
+  --mod-personas: #b3a2ff;
+  --mod-catalogos: #56cfe1;
+  --mod-equipos: #a7d95a;
+  --mod-mantenimiento: #f79a63;
+  --mod-preventivos: #e8c266;
+  --mod-paradas: #ff8fa3;
+  --mod-engrase: #7cb1ff;
+  --mod-neumaticos: #a8b6c9;
+  --mod-reportes: #d3b592;
+
+  --sidebar: #041a13;
+  --sidebar-2: #07271d;
+  --sidebar-3: #03170f;
+  --sidebar-border: #10382b;
+  --sidebar-fg: #e8f4ee;
+  --sidebar-muted: #84a397;
+  --sidebar-signal: #c9f75a;
+  --sidebar-glow: #2dd4a7;
+  --sidebar-card: rgb(255 255 255 / 0.035);
+  --sidebar-hover: rgb(255 255 255 / 0.05);
+  --sidebar-chip: rgb(255 255 255 / 0.03);
+  --sidebar-logo-bg: #c9f75a;
+  --sidebar-logo-fg: #06231b;
+  --sidebar-logo-dot: #eaffb0;
+  --sidebar-logo-ring: #041a13;
+
+  --fuerte-1: #082a20;
+  --fuerte-2: #041a13;
+  --fuerte-3: #03130e;
+  --fuerte-border: #17493a;
+  --fuerte-fg: #eef7f1;
+  --fuerte-muted: rgb(238 247 241 / 0.6);
+  --fuerte-line: rgb(255 255 255 / 0.1);
+  --fuerte-chip: rgb(255 255 255 / 0.055);
+  --fuerte-chip-border: rgb(255 255 255 / 0.1);
+  --fuerte-accent: #c9f75a;
+  --fuerte-accent-soft: rgb(201 247 90 / 0.15);
+  --fuerte-badge-bg: #c9f75a;
+  --fuerte-badge-fg: #06231b;
+  --fuerte-cta: #c9f75a;
+  --fuerte-cta-hover: #d6ff6f;
+  --fuerte-cta-fg: #06231b;
+  --fuerte-top-1: #c9f75a;
+  --fuerte-top-2: #5eead4;
+  --fuerte-track: rgb(255 255 255 / 0.1);
+  --fuerte-bar-1: #5eead4;
+  --fuerte-bar-2: #c9f75a;
+  --fuerte-bar-warn-1: #f5c56b;
+  --fuerte-bar-warn-2: #ff8b93;
+  --fuerte-warn-bg: rgb(245 197 107 / 0.1);
+  --fuerte-warn-border: rgb(245 197 107 / 0.2);
+  --fuerte-warn-fg: #f5dfaa;
+  --fuerte-point-1: #c9f75a;
+  --fuerte-point-2: #5eead4;
+  --fuerte-point-3: #f5c56b;
+  --fuerte-logo-dot: #eaffb0;
+
+  --shadow-card:
+    0 1px 2px rgb(0 0 0 / 0.35), 0 18px 40px -26px rgb(0 0 0 / 0.75);
+  --shadow-pop:
+    0 2px 10px rgb(0 0 0 / 0.4), 0 30px 70px -28px rgb(0 0 0 / 0.85);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-lime: var(--lime);
+  --color-lime-soft: var(--lime-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-grace: var(--grace);
+  --color-grace-soft: var(--grace-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-2: var(--sidebar-2);
+  --color-sidebar-3: var(--sidebar-3);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-card: var(--sidebar-card);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-chip: var(--sidebar-chip);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(
+      circle at 6% -6%,
+      color-mix(in srgb, var(--primary) 8%, transparent),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 98% 102%,
+      color-mix(in srgb, var(--lime) 9%, transparent),
+      transparent 36rem
+    );
+  background-attachment: fixed;
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings:
+    "ss01" 1,
+    "cv02" 1,
+    "cv03" 1;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/*
+ * Utilidades de la casa.
+ * .reticula: malla técnica para bandas de marca.
+ * .filete: línea superior con degradado de señal.
+ * .grano: textura fina para el chrome oscuro.
+ * .cifra: números tabulares con tracking cerrado.
+ *
+ * Van en la capa components para que cualquier utilidad de Tailwind
+ * (por ejemplo `fixed` o `bg-*`) pueda sobrescribirlas sin pelear.
+ */
+@layer components {
+  .reticula {
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, currentColor 9%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, currentColor 9%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 28px 28px;
+  }
+
+  .filete {
+    position: relative;
+  }
+
+  .filete::before {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    content: "";
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--primary) 45%, transparent) 16%,
+      color-mix(in srgb, var(--lime) 45%, transparent) 62%,
+      transparent
+    );
+  }
+
+  .grano {
+    isolation: isolate;
+  }
+
+  .grano::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: "";
+    pointer-events: none;
+    opacity: 0.16;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  .cifra {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+
+  /* Rellenos con un brillo superior: botones y piezas de marca. */
+  .fondo-primario {
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 78%, white) 0%,
+      var(--primary) 58%
+    );
+  }
+
+  .fondo-lima {
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--lime) 80%, white) 0%,
+      var(--lime) 65%
+    );
+  }
+
+  .fondo-superficie {
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface) 96%, white) 0%,
+      var(--surface) 100%
+    );
+  }
+
+  .sombra-cta-fuerte {
+    box-shadow:
+      0 10px 24px -14px color-mix(in srgb, var(--fuerte-cta) 65%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 0.35);
+  }
+
+  /* Entrada corta y sobria para tarjetas y avisos. */
+  @keyframes aparecer {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .animar-aparecer {
+    animation: aparecer 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes latir {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.08;
+    transform: scale(1.9);
+  }
+}
+
+.animar-latir {
+  animation: latir 2.6s ease-in-out infinite;
+}
+
+dialog::backdrop {
+  background: rgb(3 18 13 / 0.62);
+  backdrop-filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
