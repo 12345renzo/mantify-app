@@ -9,6 +9,7 @@ const BASE: Record<DomainErrorCode, string> = {
   CONFLICT: "El registro cambió mientras trabajabas. Recarga la página.",
   RATE_LIMITED: "Demasiados intentos. Espera un momento.",
   LIMIT: "Llegaste al límite de cuentas de tu plan.",
+  EN_USO: "Está en uso por registros activos.",
 };
 
 export function mensajeError(

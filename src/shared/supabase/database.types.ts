@@ -742,6 +742,117 @@ export type Database = {
         };
         Relationships: [];
       };
+      equipos: {
+        Row: {
+          actualizado_en: string;
+          actualizado_por: string | null;
+          categoria_id: string;
+          codigo: string;
+          creado_en: string;
+          creado_por: string | null;
+          eliminado_en: string | null;
+          empresa_id: string;
+          estado_movilizacion: string;
+          estado_operativo: string;
+          horometro_actual: number;
+          horometro_actual_en: string | null;
+          id: string;
+          id_externo: string | null;
+          marca: string | null;
+          modelo: string | null;
+          numero_serie: string | null;
+          requiere_engrase: boolean;
+          ubicacion_id: string | null;
+          version: number;
+        };
+        Insert: {
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          categoria_id: string;
+          codigo: string;
+          creado_en?: string;
+          creado_por?: string | null;
+          eliminado_en?: string | null;
+          empresa_id: string;
+          estado_movilizacion?: string;
+          estado_operativo?: string;
+          horometro_actual?: number;
+          horometro_actual_en?: string | null;
+          id?: string;
+          id_externo?: string | null;
+          marca?: string | null;
+          modelo?: string | null;
+          numero_serie?: string | null;
+          requiere_engrase?: boolean;
+          ubicacion_id?: string | null;
+          version?: number;
+        };
+        Update: {
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          categoria_id?: string;
+          codigo?: string;
+          creado_en?: string;
+          creado_por?: string | null;
+          eliminado_en?: string | null;
+          empresa_id?: string;
+          estado_movilizacion?: string;
+          estado_operativo?: string;
+          horometro_actual?: number;
+          horometro_actual_en?: string | null;
+          id?: string;
+          id_externo?: string | null;
+          marca?: string | null;
+          modelo?: string | null;
+          numero_serie?: string | null;
+          requiere_engrase?: boolean;
+          ubicacion_id?: string | null;
+          version?: number;
+        };
+        Relationships: [];
+      };
+      lecturas_horometro: {
+        Row: {
+          creado_en: string;
+          creado_por: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          es_correccion: boolean;
+          fecha: string;
+          id: string;
+          motivo_correccion: string | null;
+          origen_id: string | null;
+          origen_tipo: string;
+          valor: number;
+        };
+        Insert: {
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          es_correccion?: boolean;
+          fecha: string;
+          id?: string;
+          motivo_correccion?: string | null;
+          origen_id?: string | null;
+          origen_tipo: string;
+          valor: number;
+        };
+        Update: {
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id?: string;
+          equipo_id?: string;
+          es_correccion?: boolean;
+          fecha?: string;
+          id?: string;
+          motivo_correccion?: string | null;
+          origen_id?: string | null;
+          origen_tipo?: string;
+          valor?: number;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       v_empresas_estado: {
@@ -785,6 +896,11 @@ export type Database = {
       mi_empresa_id: { Args: never; Returns: string };
       mi_persona_id: { Args: never; Returns: string };
       mi_rol: { Args: never; Returns: string };
+      importar_equipos: { Args: { p_filas: Json }; Returns: Json };
+      autores_lecturas: {
+        Args: { p_equipo: string };
+        Returns: { lectura_id: string; nombre: string }[];
+      };
       normalizar_nombre: { Args: { t: string }; Returns: string };
       registrar_ingreso: { Args: never; Returns: undefined };
       revocar_sesiones_usuario: {

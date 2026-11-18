@@ -6,6 +6,8 @@ export const DOMAIN_ERROR_CODES = [
   "CONFLICT",
   "RATE_LIMITED",
   "LIMIT",
+  // Un catálogo que usa un registro activo (p. ej. categoría con equipos).
+  "EN_USO",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

@@ -12,6 +12,8 @@ const CODIGOS: Record<string, DomainErrorCode> = {
   "42501": "FORBIDDEN", // RLS o permiso
   P0002: "NOT_FOUND",
   MT001: "LIMIT", // cupo de usuarios del plan (trigger usuarios_cupo)
+  MT002: "CONFLICT", // lectura menor que el horómetro (otra lectura entró antes)
+  MT003: "EN_USO", // catálogo usado por equipos activos
   PGRST116: "NOT_FOUND",
 };
 

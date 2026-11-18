@@ -35,6 +35,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
+    // La importación de equipos acepta Excel de hasta 2 MB (más el sobre del formulario).
+    serverActions: { bodySizeLimit: "2.5mb" },
   },
   cacheComponents: true,
   partialPrefetching: true,

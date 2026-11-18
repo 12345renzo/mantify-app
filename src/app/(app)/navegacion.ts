@@ -90,7 +90,9 @@ export const NAVEGACION: GrupoNav[] = [
         descripcion: "Flota, movilización y horómetro.",
         icono: IconoEquipo,
         color: "var(--mod-equipos)",
-        corte: 4,
+        href: "/equipos",
+        // El técnico no ve el estado de la flota.
+        roles: ["PLANIFICADOR", "SUPERVISOR", "GERENTE"],
       },
       {
         etiqueta: "Backlogs y OT",

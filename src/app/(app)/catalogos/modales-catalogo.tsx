@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import {
-  cambiarActivoAction,
-  guardarElementoAction,
-  type EstadoCatalogo,
-} from "./actions";
+import { cambiarActivoAction, guardarElementoAction } from "./actions";
 import { boton, campo, etiqueta } from "@/shared/ui/estilos";
 import { IconoMas } from "@/shared/ui/iconos";
+import {
+  PieFormulario as Pie,
+  useAccionModal as useAccion,
+  useModal,
+} from "@/shared/ui/formulario-modal";
 import { Modal } from "@/shared/ui/modal";
 import {
   CATALOGOS,
@@ -19,68 +19,6 @@ import type { Elemento } from "@/modules/catalogos/application/repositorios";
 
 const enlace = "text-sm font-semibold hover:underline";
 
-function useModal() {
-  const [abierto, setAbierto] = useState(false);
-  // Cambiar la key al abrir deja el formulario limpio cada vez.
-  const [vez, setVez] = useState(0);
-  return {
-    abierto,
-    vez,
-    abrir: () => {
-      setVez((n) => n + 1);
-      setAbierto(true);
-    },
-    cerrar: () => setAbierto(false),
-  };
-}
-
-// Cierra el modal cuando la acción sale bien.
-function useAccion(
-  accion: (p: EstadoCatalogo, fd: FormData) => Promise<EstadoCatalogo>,
-  onListo: () => void,
-) {
-  return useActionState(async (previo: EstadoCatalogo, fd: FormData) => {
-    const r = await accion(previo, fd);
-    if (r.exito) onListo();
-    return r;
-  }, {});
-}
-
-function Pie({
-  estado,
-  pendiente,
-  texto,
-  peligro,
-  onCerrar,
-}: {
-  estado: EstadoCatalogo;
-  pendiente: boolean;
-  texto: string;
-  peligro?: boolean;
-  onCerrar: () => void;
-}) {
-  return (
-    <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border px-6 py-4">
-      {estado.error && (
-        <p className="mr-auto text-sm text-bad" aria-live="polite">
-          {estado.error}
-        </p>
-      )}
-      <button type="button" onClick={onCerrar} className={boton.secundario}>
-        Cancelar
-      </button>
-      <button
-        type="submit"
-        disabled={pendiente}
-        className={peligro ? boton.peligro : boton.primario}
-      >
-        {pendiente ? "Guardando…" : texto}
-      </button>
-    </div>
-  );
-}
-
-// Crear (sin elemento) o editar (con elemento).
 export type OpcionCategoria = { id: string; nombre: string; activo: boolean };
 
 export function ModalElemento({

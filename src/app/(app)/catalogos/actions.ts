@@ -88,6 +88,8 @@ export async function cambiarActivoAction(
     return {
       error: mensajeError(r.error, {
         CONFLICT: "Ya hay otro igual. Cámbialo antes de activarlo.",
+        EN_USO:
+          "No se puede desactivar: lo usan equipos activos. Cámbialos o desmovilízalos primero.",
       }),
     };
   }

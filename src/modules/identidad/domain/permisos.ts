@@ -32,6 +32,7 @@ export type Recurso =
   | "cuentas"
   | "catalogos"
   | "flota"
+  | "horometro"
   | "trabajos"
   | "informes_validados"
   | "informes_sin_validar"
@@ -48,7 +49,8 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     personas: TODO,
     cuentas: TODO,
     catalogos: TODO,
-    flota: ESCRIBIR,
+    flota: TODO,
+    horometro: ESCRIBIR,
     trabajos: ESCRIBIR,
     informes_validados: LEER,
     informes_sin_validar: LEER,
@@ -57,7 +59,9 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
   SUPERVISOR: {
     personas: LEER,
     catalogos: LEER,
-    flota: ["leer", "editar"],
+    // Registra lecturas; corregir a la baja ("editar") es solo del planificador.
+    flota: LEER,
+    horometro: ["leer", "crear"],
     trabajos: ESCRIBIR,
     informes_validados: LEER,
     informes_sin_validar: LEER,
@@ -71,6 +75,7 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     cuentas: LEER,
     catalogos: LEER,
     flota: LEER,
+    horometro: LEER,
     trabajos: LEER,
     informes_validados: LEER,
     informes_sin_validar: LEER,
