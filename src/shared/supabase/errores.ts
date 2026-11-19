@@ -14,6 +14,8 @@ const CODIGOS: Record<string, DomainErrorCode> = {
   MT001: "LIMIT", // cupo de usuarios del plan (trigger usuarios_cupo)
   MT002: "CONFLICT", // lectura menor que el horómetro (otra lectura entró antes)
   MT003: "EN_USO", // catálogo usado por equipos activos
+  MT004: "CONFLICT", // el trabajo cambió de estado (otra persona actuó antes)
+  MT005: "VALIDATION", // la parada se cruza con otra del mismo equipo (se confirma y se reintenta)
   PGRST116: "NOT_FOUND",
 };
 

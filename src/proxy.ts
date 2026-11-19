@@ -10,6 +10,9 @@ const PROTEGIDAS = [
   "/personal",
   "/catalogos",
   "/equipos",
+  "/trabajos",
+  "/preventivos",
+  "/paradas",
 ];
 
 // Refresca la sesión de Supabase en cada petición y hace la revisión optimista de rutas privadas.

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cambiarActivoAction, guardarElementoAction } from "./actions";
 import { boton, campo, etiqueta } from "@/shared/ui/estilos";
 import { IconoMas } from "@/shared/ui/iconos";
@@ -91,23 +92,33 @@ function FormElemento({
       ]),
     );
   const e = estado.errores ?? {};
+  // Valor elegido en cada lista: algunos campos solo aparecen según ella.
+  const [sel, setSel] = useState<Record<string, string>>(v);
   return (
     <form action={enviar} noValidate>
       <input type="hidden" name="catalogo" value={catalogo} />
       <input type="hidden" name="id" value={elemento?.id ?? ""} />
       <div className="grid gap-5 p-6 sm:grid-cols-2">
-        {camposEditables(def).map((c) => (
-          <CampoFormulario
-            key={c.clave}
-            campo={c}
-            valor={v[c.clave] ?? ""}
-            error={e[c.clave]}
-            categorias={categorias}
-            ancho={
-              c.clave === def.principal || (c.tipo === "texto" && !!c.largo)
-            }
-          />
-        ))}
+        {camposEditables(def).map((c) =>
+          c.tipo === "numero" &&
+          c.soloSi &&
+          !c.soloSi.valores.includes(sel[c.soloSi.campo] ?? "") ? (
+            // Oculto pero enviado vacío, para que el servidor lo reciba.
+            <input key={c.clave} type="hidden" name={c.clave} value="" />
+          ) : (
+            <CampoFormulario
+              key={c.clave}
+              campo={c}
+              onElegir={(x) => setSel((s) => ({ ...s, [c.clave]: x }))}
+              valor={v[c.clave] ?? ""}
+              error={e[c.clave]}
+              categorias={categorias}
+              ancho={
+                c.clave === def.principal || (c.tipo === "texto" && !!c.largo)
+              }
+            />
+          ),
+        )}
       </div>
       <Pie
         estado={estado}
@@ -125,14 +136,18 @@ function CampoFormulario({
   error,
   categorias,
   ancho,
+  onElegir,
 }: {
+  onElegir: (valor: string) => void;
   campo: Campo;
   valor: string;
   error?: string;
   categorias: OpcionCategoria[];
   ancho: boolean;
 }) {
-  const opcional = c.tipo === "categoria" || ("requerido" in c && !c.requerido);
+  const opcional =
+    c.tipo === "categoria" ||
+    ("requerido" in c && !c.requerido && !("soloSi" in c && c.soloSi));
   const ayuda = "ayuda" in c ? c.ayuda : undefined;
   const comun = {
     id: c.clave,
@@ -170,7 +185,11 @@ function CampoFormulario({
         />
       )}
       {c.tipo === "opciones" && (
-        <select {...comun} className={campo}>
+        <select
+          {...comun}
+          onChange={(ev) => onElegir(ev.target.value)}
+          className={campo}
+        >
           <option value="">{c.requerido ? "Elige…" : "—"}</option>
           {Object.entries(c.opciones).map(([valor, texto]) => (
             <option key={valor} value={valor}>

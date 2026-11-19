@@ -1,6 +1,10 @@
 import { Suspense, type ReactNode } from "react";
 import { obtenerActor } from "@/modules/acceso/infrastructure/sesion";
-import { ETIQUETA_ROL, esRol } from "@/modules/identidad/domain/permisos";
+import {
+  ETIQUETA_ROL,
+  esRol,
+  puede,
+} from "@/modules/identidad/domain/permisos";
 import { AppShell, MenuCargando, MenuConRuta } from "./app-shell";
 import { AvisoClave } from "./cuenta/formulario-clave";
 import { MenuPerfil } from "./menu-perfil";
@@ -41,6 +45,7 @@ async function Perfil() {
     <MenuPerfil
       email={actor.email}
       rol={esRol(actor.rol) ? ETIQUETA_ROL[actor.rol] : "Usuario"}
+      firma={actor.habilitado && puede(actor.rol, "crear", "trabajos")}
     />
   );
 }

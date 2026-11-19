@@ -5,13 +5,14 @@ import {
   ESTADOS_MOVILIZACION,
   ESTADOS_OPERATIVOS,
 } from "@/modules/equipos/domain/equipo";
-import { boton, campo, etiqueta } from "@/shared/ui/estilos";
+import { boton, campo } from "@/shared/ui/estilos";
 import {
   PieFormulario,
   useAccionModal,
   useModal,
 } from "@/shared/ui/formulario-modal";
 import { IconoMas } from "@/shared/ui/iconos";
+import { Campo } from "@/shared/ui/campo";
 import { Modal } from "@/shared/ui/modal";
 import {
   crearEquipoAction,
@@ -23,41 +24,6 @@ import {
 export type Opcion = { id: string; nombre: string; activo: boolean };
 
 const enlace = "text-sm font-semibold hover:underline";
-
-function Campo({
-  id,
-  label,
-  error,
-  ayuda,
-  opcional,
-  ancho,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  ayuda?: string;
-  opcional?: boolean;
-  ancho?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={ancho ? "sm:col-span-2" : ""}>
-      <label htmlFor={id} className={etiqueta}>
-        {label}
-        {opcional && (
-          <span className="ml-1 font-normal text-muted">(opcional)</span>
-        )}
-      </label>
-      {children}
-      {error ? (
-        <p className="mt-1.5 text-sm text-bad">{error}</p>
-      ) : (
-        ayuda && <p className="mt-1.5 text-xs text-muted">{ayuda}</p>
-      )}
-    </div>
-  );
-}
 
 // Las inactivas no se ofrecen, salvo la que ya tiene el equipo: así editar no la cambia sola.
 const opciones = (lista: Opcion[], actual: string) =>

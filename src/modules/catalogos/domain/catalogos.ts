@@ -44,6 +44,8 @@ export type Campo =
       decimales: 0 | 2;
       requerido: boolean;
       ayuda?: string;
+      // Solo se pide (y es obligatorio) cuando otro campo vale uno de estos.
+      soloSi?: { campo: string; valores: string[] };
     }
   // Categoría de equipo de la misma empresa. Vacía = aplica a todas.
   | { clave: string; etiqueta: string; tipo: "categoria" }
@@ -195,20 +197,27 @@ export const CATALOGOS: Record<CodigoCatalogo, DefCatalogo> = {
         max: 1000,
         decimales: 2,
         requerido: false,
-        ayuda: "Solo para PM1 a PM4. Sirve para planificar.",
+        ayuda: "Sirve para planificar.",
+        soloSi: { campo: "codigo", valores: Object.keys(PLANES_PM) },
       },
     ],
     principal: "nombre",
     ordenarPor: ["codigo"],
     unico: "uno con ese código",
-    validar: (v) =>
-      v.duracion_estandar_horas !== null &&
-      !(typeof v.codigo === "string" && v.codigo in PLANES_PM)
-        ? {
-            campo: "duracion_estandar_horas",
-            mensaje: "Solo los PM1 a PM4 llevan duración.",
-          }
-        : null,
+    validar: (v) => {
+      const pm = typeof v.codigo === "string" && v.codigo in PLANES_PM;
+      if (pm && v.duracion_estandar_horas === null)
+        return {
+          campo: "duracion_estandar_horas",
+          mensaje: "La duración es obligatoria en PM1 a PM4.",
+        };
+      if (!pm && v.duracion_estandar_horas !== null)
+        return {
+          campo: "duracion_estandar_horas",
+          mensaje: "Solo los PM1 a PM4 llevan duración.",
+        };
+      return null;
+    },
   },
   areas_responsables: {
     titulo: "Áreas responsables",

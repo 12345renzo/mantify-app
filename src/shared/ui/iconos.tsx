@@ -36,6 +36,7 @@ import {
   Truck,
   Users,
   Wrench,
+  PenLine,
   X,
   Zap,
   type LucideIcon,
@@ -76,6 +77,7 @@ export const IconoPersonas = crear(Users);
 export const IconoCatalogo = crear(LibraryBig);
 export const IconoEquipo = crear(Truck);
 export const IconoLlave = crear(Wrench);
+export const IconoFirma = crear(PenLine);
 export const IconoCalendario = crear(CalendarDays);
 export const IconoParada = crear(TriangleAlert);
 export const IconoGota = crear(Droplets);

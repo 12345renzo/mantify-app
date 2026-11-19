@@ -1,14 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { IconoCandado, IconoSalir } from "@/shared/ui/iconos";
+import { IconoCandado, IconoFirma, IconoSalir } from "@/shared/ui/iconos";
 import { cerrarSesion } from "../(publico)/login/actions";
 import { ModalClave } from "./cuenta/formulario-clave";
+import { PanelFirma } from "./trabajos/modal-firma";
 
-// `rol` llega ya como texto para mostrar ("Planificador").
-export function MenuPerfil({ email, rol }: { email: string; rol: string }) {
+// `rol` llega ya como texto para mostrar ("Planificador"). `firma`: quien cierra o valida trabajos.
+export function MenuPerfil({
+  email,
+  rol,
+  firma,
+}: {
+  email: string;
+  rol: string;
+  firma: boolean;
+}) {
   const [abierto, setAbierto] = useState(false);
   const [claveAbierta, setClaveAbierta] = useState(false);
+  const [firmaAbierta, setFirmaAbierta] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
   const iniciales = email.slice(0, 2).toUpperCase();
 
@@ -100,6 +110,22 @@ export function MenuPerfil({ email, rol }: { email: string; rol: string }) {
               </span>
               Cambiar contraseña
             </button>
+            {firma && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setAbierto(false);
+                  setFirmaAbierta(true);
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-fg transition-colors hover:bg-surface-2"
+              >
+                <span className="grid size-7 place-items-center rounded-lg bg-surface-2 text-muted ring-1 ring-inset ring-border/70">
+                  <IconoFirma width={15} height={15} />
+                </span>
+                Mi firma
+              </button>
+            )}
           </div>
           <form action={cerrarSesion} className="border-t border-border p-1.5">
             <button
@@ -119,6 +145,12 @@ export function MenuPerfil({ email, rol }: { email: string; rol: string }) {
         abierto={claveAbierta}
         onCerrar={() => setClaveAbierta(false)}
       />
+      {firma && (
+        <PanelFirma
+          abierto={firmaAbierta}
+          onCerrar={() => setFirmaAbierta(false)}
+        />
+      )}
     </div>
   );
 }

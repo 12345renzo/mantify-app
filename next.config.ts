@@ -8,7 +8,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data:",
+  // Fotos y firmas: URL firmadas de Supabase Storage.
+  `img-src 'self' blob: data: ${supabaseOrigin}`,
   "font-src 'self' data:",
   `connect-src 'self' ${supabaseOrigin} ${supabaseOrigin.replace(/^http/, "ws")}`,
   "object-src 'none'",
@@ -35,8 +36,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
-    // La importación de equipos acepta Excel de hasta 2 MB (más el sobre del formulario).
-    serverActions: { bodySizeLimit: "2.5mb" },
+    // Hasta 3 fotos de 2 MB por backlog o RM (más el sobre del formulario); el Excel de equipos pesa 2 MB.
+    serverActions: { bodySizeLimit: "7mb" },
   },
   cacheComponents: true,
   partialPrefetching: true,
