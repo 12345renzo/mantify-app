@@ -73,14 +73,14 @@ describe("calcularInicioNuevaMembresia", () => {
   it("pago el día del vencimiento: día siguiente al fin", () => {
     expect(calcularInicioNuevaMembresia(FIN, FIN, GRACIA)).toBe("2026-12-01");
   });
-  it("pago durante la gracia: día siguiente al vencimiento", () => {
+  it("pago durante la gracia: al terminar la gracia", () => {
     expect(calcularInicioNuevaMembresia(FIN, "2026-12-02", GRACIA)).toBe(
-      "2026-12-01",
+      "2026-12-04",
     );
   });
-  it("pago el último día de gracia: día siguiente al vencimiento", () => {
+  it("pago el último día de gracia: al terminar la gracia", () => {
     expect(calcularInicioNuevaMembresia(FIN, "2026-12-03", GRACIA)).toBe(
-      "2026-12-01",
+      "2026-12-04",
     );
   });
   it("pago después de la gracia: día del pago", () => {

@@ -10,22 +10,17 @@ export function crearCuentasRepositorio(
 ): CuentasRepositorio {
   return {
     async cupo(empresaId) {
-      const [usados, empresa] = await Promise.all([
+      const [usados, tope] = await Promise.all([
         db
           .from("usuarios")
           .select("id", { count: "exact", head: true })
           .eq("empresa_id", empresaId),
-        db
-          .from("empresas")
-          .select("planes(max_accesos)")
-          .eq("id", empresaId)
-          .maybeSingle(),
+        db.rpc("cupo_cuentas", { p_empresa_id: empresaId }),
       ]);
       if (usados.error) throw aDomainError(usados.error);
-      if (empresa.error) throw aDomainError(empresa.error);
-      const plan = empresa.data?.planes as
-        { max_accesos: number | null } | null | undefined;
-      return { usados: usados.count ?? 0, maximo: plan?.max_accesos ?? null };
+      if (tope.error) throw aDomainError(tope.error);
+      // La función devuelve nulo cuando el plan no tiene límite.
+      return { usados: usados.count ?? 0, maximo: tope.data ?? null };
     },
 
     async insertar(d) {

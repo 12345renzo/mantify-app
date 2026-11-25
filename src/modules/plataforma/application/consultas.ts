@@ -24,6 +24,7 @@ export type EmpresaResumen = {
   fechaFin: FechaISO | null;
   diasGracia: number;
   motivoInactivacion: string | null;
+  cuentas: number;
 };
 
 export type PagoRegistrado = {
@@ -41,9 +42,8 @@ export type DetalleEmpresa = EmpresaResumen & {
   razonSocial: string | null;
   correoContacto: string | null;
   zonaHoraria: string;
-  // Precio que paga esta empresa: se copia del plan al asignarlo y no cambia si el plan sube o baja.
-  precioMensual: number;
-  moneda: string;
+  // Plan ya pagado que aún no empieza.
+  proximoPlan: { planId: string; desde: FechaISO } | null;
   pagos: PagoRegistrado[];
 };
 

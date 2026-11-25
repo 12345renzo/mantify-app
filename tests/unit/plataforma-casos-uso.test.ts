@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Actor } from "@/shared/kernel/actor";
-import { activarDesactivarEmpresa } from "@/modules/plataforma/application/activar-desactivar-empresa";
+import { darDeBajaEmpresa } from "@/modules/plataforma/application/dar-de-baja-empresa";
 import { cambiarPrecioPlan } from "@/modules/plataforma/application/cambiar-precio-plan";
 import { crearEmpresa } from "@/modules/plataforma/application/crear-empresa";
-import { reactivarEmpresa } from "@/modules/plataforma/application/reactivar-empresa";
-import { registrarPagoManual } from "@/modules/plataforma/application/registrar-pago-manual";
+import { renovarEmpresa } from "@/modules/plataforma/application/renovar-empresa";
 import type {
-  CambioEstadoEmpresa,
   EmpresaParaMembresia,
   EmpresasRepositorio,
-  MembresiasRepositorio,
+  MotivoBaja,
   NuevaEmpresa,
   PlanesRepositorio,
 } from "@/modules/plataforma/application/repositorios";
@@ -33,10 +31,9 @@ const AHORA = new Date("2026-11-17T15:00:00Z");
 
 function fakes(empresa: Partial<EmpresaParaMembresia> = {}) {
   const creadas: NuevaEmpresa[] = [];
-  const cambios: CambioEstadoEmpresa[] = [];
-  const pagos: { inicio: string; fin: string }[] = [];
+  const bajas: MotivoBaja[] = [];
   const precios: number[] = [];
-  const reactivadas: { planId: string; inicio: string; fin: string }[] = [];
+  const renovadas: { planId: string; inicio: string; fin: string }[] = [];
   const empresas: EmpresasRepositorio = {
     crear: async (d) => (creadas.push(d), ok({ id: EMPRESA })),
     obtenerParaMembresia: async (id) =>
@@ -50,30 +47,15 @@ function fakes(empresa: Partial<EmpresaParaMembresia> = {}) {
             ...empresa,
           })
         : err(new DomainError("NOT_FOUND", "no existe")),
-    cambiarEstado: async (_id, c) => (cambios.push(c), ok(undefined)),
+    darDeBaja: async (_id, m) => (bajas.push(m), ok(undefined)),
     actualizar: async () => ok(undefined),
-    reactivar: async (d) => (reactivadas.push(d), ok(undefined)),
-  };
-  const membresias: MembresiasRepositorio = {
-    registrarPagoManual: async (d) => (
-      pagos.push(d),
-      ok({ membresiaId: "m1" })
-    ),
+    renovar: async (d) => (renovadas.push(d), ok(undefined)),
   };
   const planes: PlanesRepositorio = {
     existeActivo: async (id) => id === PLAN,
     cambiarPrecio: async (_id, p) => (precios.push(p), ok(undefined)),
   };
-  return {
-    empresas,
-    membresias,
-    planes,
-    creadas,
-    cambios,
-    pagos,
-    precios,
-    reactivadas,
-  };
+  return { empresas, planes, creadas, bajas, precios, renovadas };
 }
 
 const entradaEmpresa = {
@@ -91,23 +73,18 @@ describe("permisos", () => {
     ["usuario de empresa", { ...superadmin, rol: "PLANIFICADOR" }, "FORBIDDEN"],
   ];
   it.each(casos)(
-    "%s no puede crear, pagar, desactivar ni cambiar precio",
+    "%s no puede crear, renovar, dar de baja ni cambiar precio",
     async (_n, actor, code) => {
       const f = fakes();
       const r = await Promise.all([
         crearEmpresa(actor, entradaEmpresa, f),
-        registrarPagoManual(
+        renovarEmpresa(
           actor,
-          { empresaId: EMPRESA, referencia: null },
+          { empresaId: EMPRESA, planId: PLAN, referencia: null },
           f,
           AHORA,
         ),
-        activarDesactivarEmpresa(
-          actor,
-          { empresaId: EMPRESA, accion: "DESACTIVAR" },
-          f,
-          AHORA,
-        ),
+        darDeBajaEmpresa(actor, { empresaId: EMPRESA }, f, AHORA),
         cambiarPrecioPlan(actor, { planId: PLAN, precioMensual: 400 }, f),
       ]);
       for (const res of r) {
@@ -115,7 +92,10 @@ describe("permisos", () => {
         if (!res.ok) expect(res.error.code).toBe(code);
       }
       expect(
-        f.creadas.length + f.pagos.length + f.cambios.length + f.precios.length,
+        f.creadas.length +
+          f.renovadas.length +
+          f.bajas.length +
+          f.precios.length,
       ).toBe(0);
     },
   );
@@ -140,112 +120,74 @@ describe("crearEmpresa", () => {
   });
 });
 
-describe("registrarPagoManual", () => {
-  it("primer pago: AL_DIA desde hoy por 30 días", async () => {
-    const f = fakes();
-    const r = await registrarPagoManual(
-      superadmin,
-      { empresaId: EMPRESA, referencia: "OP-1" },
-      f,
-      AHORA,
-    );
-    expect(r.ok && [r.value.inicio, r.value.fin]).toEqual([
-      "2026-11-17",
-      "2026-12-16",
-    ]);
-  });
-  it("pago durante la gracia: empieza el día siguiente al vencimiento", async () => {
-    const f = fakes({ finVigente: "2026-11-15" });
-    const r = await registrarPagoManual(
-      superadmin,
-      { empresaId: EMPRESA, referencia: null },
-      f,
-      AHORA,
-    );
-    expect(r.ok && r.value.inicio).toBe("2026-11-16");
-  });
-  it("pago tras la gracia: empieza el día del pago", async () => {
-    const f = fakes({ finVigente: "2026-11-10" });
-    const r = await registrarPagoManual(
-      superadmin,
-      { empresaId: EMPRESA, referencia: null },
-      f,
-      AHORA,
-    );
-    expect(r.ok && r.value.inicio).toBe("2026-11-17");
-  });
-  it("empresa que no existe: NOT_FOUND", async () => {
-    const f = fakes();
-    const r = await registrarPagoManual(
-      superadmin,
-      { empresaId: PLAN, referencia: null },
-      f,
-      AHORA,
-    );
-    expect(!r.ok && r.error.code).toBe("NOT_FOUND");
-  });
-});
-
-describe("activarDesactivarEmpresa", () => {
+describe("darDeBajaEmpresa", () => {
+  const baja = (f: ReturnType<typeof fakes>) =>
+    darDeBajaEmpresa(superadmin, { empresaId: EMPRESA }, f, AHORA);
   it("vencida tras la gracia: motivo VENCIMIENTO", async () => {
     const f = fakes({ finVigente: "2026-11-10" });
-    await activarDesactivarEmpresa(
-      superadmin,
-      { empresaId: EMPRESA, accion: "DESACTIVAR" },
-      f,
-      AHORA,
-    );
-    expect(f.cambios[0]).toEqual({ estado: "INACTIVA", motivo: "VENCIMIENTO" });
+    await baja(f);
+    expect(f.bajas).toEqual(["VENCIMIENTO"]);
   });
   it("al día: motivo MANUAL", async () => {
     const f = fakes({ finVigente: "2026-12-10" });
-    await activarDesactivarEmpresa(
-      superadmin,
-      { empresaId: EMPRESA, accion: "DESACTIVAR" },
-      f,
-      AHORA,
-    );
-    expect(f.cambios[0]).toEqual({ estado: "INACTIVA", motivo: "MANUAL" });
+    await baja(f);
+    expect(f.bajas).toEqual(["MANUAL"]);
   });
-  it("activar deja la empresa ACTIVA", async () => {
-    const f = fakes();
-    await activarDesactivarEmpresa(
-      superadmin,
-      { empresaId: EMPRESA, accion: "ACTIVAR" },
-      f,
-      AHORA,
-    );
-    expect(f.cambios[0]).toEqual({ estado: "ACTIVA" });
+  it("ya de baja: CONFLICT", async () => {
+    const f = fakes({ estado: "INACTIVA" });
+    const r = await baja(f);
+    expect(!r.ok && r.error.code).toBe("CONFLICT");
+    expect(f.bajas).toHaveLength(0);
   });
 });
 
-describe("reactivarEmpresa", () => {
+describe("renovarEmpresa", () => {
   const entrada = { empresaId: EMPRESA, planId: PLAN, referencia: null };
-  it("vencida (pasó la gracia): reactiva con 30 días desde hoy", async () => {
-    const f = fakes({ finVigente: "2026-10-31" });
-    const r = await reactivarEmpresa(superadmin, entrada, f, AHORA);
-    expect(r.ok && r.value).toEqual({
-      inicio: "2026-11-17",
-      fin: "2026-12-16",
-    });
-    expect(f.reactivadas).toHaveLength(1);
+  const casos: [string, Partial<EmpresaParaMembresia>, string][] = [
+    ["nunca pagó: hoy", {}, "2026-11-17"],
+    ["por vencer: tras el fin", { finVigente: "2026-11-20" }, "2026-11-21"],
+    ["en gracia: tras la gracia", { finVigente: "2026-11-15" }, "2026-11-19"],
+    ["vencida: hoy", { finVigente: "2026-10-31" }, "2026-11-17"],
+    [
+      "de baja ayer: hoy",
+      { estado: "INACTIVA", finVigente: "2026-11-16" },
+      "2026-11-17",
+    ],
+    [
+      "de baja hoy: mañana",
+      { estado: "INACTIVA", finVigente: "2026-11-17" },
+      "2026-11-18",
+    ],
+  ];
+  it.each(casos)("%s", async (_n, empresa, inicio) => {
+    const f = fakes(empresa);
+    const r = await renovarEmpresa(superadmin, entrada, f, AHORA);
+    expect(r.ok && r.value.inicio).toBe(inicio);
+    expect(f.renovadas).toHaveLength(1);
   });
-  it("plan vigente o en gracia: CONFLICT y no cambia nada", async () => {
-    for (const finVigente of ["2026-12-20", "2026-11-15"]) {
-      const f = fakes({ finVigente });
-      const r = await reactivarEmpresa(superadmin, entrada, f, AHORA);
-      expect(!r.ok && r.error.code).toBe("CONFLICT");
-      expect(f.reactivadas).toHaveLength(0);
-    }
+  it("al día: CONFLICT y no cambia nada", async () => {
+    const f = fakes({ finVigente: "2026-12-20" });
+    const r = await renovarEmpresa(superadmin, entrada, f, AHORA);
+    expect(!r.ok && r.error.code).toBe("CONFLICT");
+    expect(f.renovadas).toHaveLength(0);
   });
   it("plan inexistente: VALIDATION", async () => {
     const f = fakes({ finVigente: "2026-10-31" });
-    const r = await reactivarEmpresa(
+    const r = await renovarEmpresa(
       superadmin,
       { ...entrada, planId: "otro" },
       f,
       AHORA,
     );
     expect(!r.ok && r.error.code).toBe("VALIDATION");
+  });
+  it("empresa que no existe: NOT_FOUND", async () => {
+    const r = await renovarEmpresa(
+      superadmin,
+      { ...entrada, empresaId: PLAN },
+      fakes(),
+      AHORA,
+    );
+    expect(!r.ok && r.error.code).toBe("NOT_FOUND");
   });
 });

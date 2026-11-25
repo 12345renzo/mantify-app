@@ -32,24 +32,15 @@ export const editarEmpresaSchema = crearEmpresaSchema
   .extend({ empresaId: z.uuid() });
 export type EditarEmpresaEntrada = z.output<typeof editarEmpresaSchema>;
 
-export const reactivarEmpresaSchema = z.object({
+export const renovarEmpresaSchema = z.object({
   empresaId: z.uuid(),
   planId: z.uuid("Elige un plan."),
   referencia: opcional(80),
 });
-export type ReactivarEmpresaEntrada = z.output<typeof reactivarEmpresaSchema>;
+export type RenovarEmpresaEntrada = z.output<typeof renovarEmpresaSchema>;
 
-export const registrarPagoSchema = z.object({
-  empresaId: z.uuid(),
-  referencia: opcional(80),
-});
-export type RegistrarPagoEntrada = z.output<typeof registrarPagoSchema>;
-
-export const cambiarEstadoSchema = z.object({
-  empresaId: z.uuid(),
-  accion: z.enum(["ACTIVAR", "DESACTIVAR"]),
-});
-export type CambiarEstadoEntrada = z.output<typeof cambiarEstadoSchema>;
+export const darDeBajaSchema = z.object({ empresaId: z.uuid() });
+export type DarDeBajaEntrada = z.output<typeof darDeBajaSchema>;
 
 export const cambiarPrecioSchema = z.object({
   planId: z.uuid(),

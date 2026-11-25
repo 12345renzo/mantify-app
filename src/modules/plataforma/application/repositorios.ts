@@ -20,9 +20,7 @@ export type EmpresaParaMembresia = {
   finVigente: FechaISO | null;
 };
 
-export type CambioEstadoEmpresa =
-  | { estado: "ACTIVA" }
-  | { estado: "INACTIVA"; motivo: "VENCIMIENTO" | "MANUAL" };
+export type MotivoBaja = "VENCIMIENTO" | "MANUAL";
 
 export type DatosEmpresa = Omit<NuevaEmpresa, "slug" | "planId">;
 
@@ -31,7 +29,7 @@ export interface EmpresasRepositorio {
   // El slug no cambia: ya puede estar en uso.
   actualizar(id: string, datos: DatosEmpresa): Promise<Result<void>>;
   // Una transacción en la base: plan nuevo, precio vigente del plan, empresa activa y membresía + pago de 30 días.
-  reactivar(datos: {
+  renovar(datos: {
     empresaId: string;
     planId: string;
     inicio: FechaISO;
@@ -39,17 +37,8 @@ export interface EmpresasRepositorio {
     referencia: string | null;
   }): Promise<Result<void>>;
   obtenerParaMembresia(id: string): Promise<Result<EmpresaParaMembresia>>;
-  cambiarEstado(id: string, cambio: CambioEstadoEmpresa): Promise<Result<void>>;
-}
-
-export interface MembresiasRepositorio {
-  // Crea membresía y pago en una sola transacción. El monto lo pone la base desde el plan.
-  registrarPagoManual(datos: {
-    empresaId: string;
-    inicio: FechaISO;
-    fin: FechaISO;
-    referencia: string | null;
-  }): Promise<Result<{ membresiaId: string }>>;
+  // Una transacción: empresa inactiva, periodo actual cortado hoy y futuros anulados.
+  darDeBaja(id: string, motivo: MotivoBaja): Promise<Result<void>>;
 }
 
 export interface PlanesRepositorio {

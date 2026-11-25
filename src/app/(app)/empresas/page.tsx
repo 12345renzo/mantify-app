@@ -5,7 +5,6 @@ import { exigirSuperadminEnPagina } from "@/modules/acceso/infrastructure/sesion
 import { listarEmpresas } from "@/modules/plataforma/application/consultas";
 import { reposPlataforma } from "@/modules/plataforma/infrastructure";
 import { EstadoPill } from "@/modules/plataforma/ui/estado-pill";
-import { calcularEstadoMembresia } from "@/modules/plataforma/domain/estado-membresia";
 import { hoyEn } from "@/shared/kernel/fechas";
 import { tarjeta } from "@/shared/ui/estilos";
 import { formatoFecha } from "@/shared/ui/formato";
@@ -140,17 +139,7 @@ async function TablaEmpresas({
                   {e.diasGracia} d
                 </td>
                 <td className="px-5 py-3.5">
-                  <AccionesFila
-                    empresa={e}
-                    planes={planes}
-                    puedeReactivar={
-                      calcularEstadoMembresia(
-                        { fin: e.fechaFin, empresaInactiva: false },
-                        e.diasGracia,
-                        hoy,
-                      ) === "VENCIDA"
-                    }
-                  />
+                  <AccionesFila empresa={e} planes={planes} hoy={hoy} />
                 </td>
               </tr>
             ))}

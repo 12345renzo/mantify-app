@@ -4,7 +4,6 @@ import { err, ok, type Result } from "@/shared/kernel/result";
 import { aDomainError } from "@/shared/supabase/errores";
 import type { SupabaseServidor } from "@/shared/supabase/server";
 import type {
-  CambioEstadoEmpresa,
   EmpresaParaMembresia,
   EmpresasRepositorio,
   NuevaEmpresa,
@@ -52,7 +51,7 @@ export function crearEmpresasRepositorio(
       return ok(undefined);
     },
 
-    async reactivar(d) {
+    async renovar(d) {
       const { error } = await db.rpc("reactivar_empresa", {
         p_empresa_id: d.empresaId,
         p_plan_id: d.planId,
@@ -94,29 +93,12 @@ export function crearEmpresasRepositorio(
       });
     },
 
-    async cambiarEstado(
-      id: string,
-      cambio: CambioEstadoEmpresa,
-    ): Promise<Result<void>> {
-      const ahora = new Date().toISOString();
-      const valores =
-        cambio.estado === "ACTIVA"
-          ? { estado: "ACTIVA", motivo_inactivacion: null, inactivada_en: null }
-          : {
-              estado: "INACTIVA",
-              motivo_inactivacion: cambio.motivo,
-              inactivada_en: ahora,
-            };
-      const { data, error } = await db
-        .from("empresas")
-        .update({ ...valores, actualizado_en: ahora })
-        .eq("id", id)
-        .select("id");
+    async darDeBaja(id, motivo): Promise<Result<void>> {
+      const { error } = await db.rpc("dar_de_baja_empresa", {
+        p_empresa_id: id,
+        p_motivo: motivo,
+      });
       if (error) return err(aDomainError(error));
-      // RLS no da error al filtrar: cero filas es "no existe o no puedes verla".
-      if (data.length === 0) {
-        return err(new DomainError("NOT_FOUND", "empresa no existe"));
-      }
       return ok(undefined);
     },
   };

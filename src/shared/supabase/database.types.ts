@@ -2654,6 +2654,7 @@ export type Database = {
     Views: {
       v_empresas_estado: {
         Row: {
+          cuentas: number | null;
           creado_en: string | null;
           dias_gracia: number | null;
           empresa_id: string | null;
@@ -2912,6 +2913,11 @@ export type Database = {
           p_referencia: string;
         };
         Returns: string;
+      };
+      cupo_cuentas: { Args: { p_empresa_id: string }; Returns: number };
+      dar_de_baja_empresa: {
+        Args: { p_empresa_id: string; p_motivo: string };
+        Returns: undefined;
       };
       registrar_ingreso: { Args: never; Returns: undefined };
       registrar_pago_manual: {

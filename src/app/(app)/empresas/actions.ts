@@ -4,18 +4,16 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { obtenerActor } from "@/modules/acceso/infrastructure/sesion";
-import { activarDesactivarEmpresa } from "@/modules/plataforma/application/activar-desactivar-empresa";
+import { darDeBajaEmpresa } from "@/modules/plataforma/application/dar-de-baja-empresa";
 import { editarEmpresa } from "@/modules/plataforma/application/editar-empresa";
-import { reactivarEmpresa } from "@/modules/plataforma/application/reactivar-empresa";
+import { renovarEmpresa } from "@/modules/plataforma/application/renovar-empresa";
 import { crearEmpresa } from "@/modules/plataforma/application/crear-empresa";
 import {
-  cambiarEstadoSchema,
+  darDeBajaSchema,
   crearEmpresaSchema,
   editarEmpresaSchema,
-  reactivarEmpresaSchema,
-  registrarPagoSchema,
+  renovarEmpresaSchema,
 } from "@/modules/plataforma/application/esquemas";
-import { registrarPagoManual } from "@/modules/plataforma/application/registrar-pago-manual";
 import { reposPlataforma } from "@/modules/plataforma/infrastructure";
 import { formatoFecha } from "@/shared/ui/formato";
 import { mensajeError } from "../mensajes";
@@ -72,54 +70,27 @@ export async function crearEmpresaAction(
   redirect(`/empresas/${r.value.id}`);
 }
 
-export async function registrarPagoAction(
+export async function darDeBajaAction(
   _previo: EstadoFormulario,
   fd: FormData,
 ): Promise<EstadoFormulario> {
-  const datos = registrarPagoSchema.safeParse(
-    valoresDe(fd, ["empresaId", "referencia"]),
-  );
-  if (!datos.success) return { errores: primerError(datos.error) };
+  const datos = darDeBajaSchema.safeParse(valoresDe(fd, ["empresaId"]));
+  if (!datos.success) return { error: "Acción no válida." };
 
-  const repos = await reposPlataforma();
-  const r = await registrarPagoManual(await obtenerActor(), datos.data, repos);
+  const r = await darDeBajaEmpresa(
+    await obtenerActor(),
+    datos.data,
+    await reposPlataforma(),
+  );
   if (!r.ok) {
     return {
       error: mensajeError(r.error, {
-        CONFLICT:
-          "Ya hay una membresía para ese periodo. Recarga la página para ver el estado actual.",
+        CONFLICT: "La empresa ya está de baja. Recarga la página.",
       }),
     };
   }
   refresh();
-  return {
-    exito: `Pago registrado. Cubre del ${formatoFecha(r.value.inicio)} al ${formatoFecha(r.value.fin)}.`,
-  };
-}
-
-export async function cambiarEstadoAction(
-  _previo: EstadoFormulario,
-  fd: FormData,
-): Promise<EstadoFormulario> {
-  const datos = cambiarEstadoSchema.safeParse(
-    valoresDe(fd, ["empresaId", "accion"]),
-  );
-  if (!datos.success) return { error: "Acción no válida." };
-
-  const repos = await reposPlataforma();
-  const r = await activarDesactivarEmpresa(
-    await obtenerActor(),
-    datos.data,
-    repos,
-  );
-  if (!r.ok) return { error: mensajeError(r.error) };
-  refresh();
-  return {
-    exito:
-      datos.data.accion === "ACTIVAR"
-        ? "Empresa activada."
-        : "Empresa desactivada.",
-  };
+  return { exito: "Empresa dada de baja." };
 }
 
 export async function editarEmpresaAction(
@@ -154,15 +125,15 @@ export async function editarEmpresaAction(
   return { exito: "Datos guardados." };
 }
 
-export async function reactivarEmpresaAction(
+export async function renovarEmpresaAction(
   _previo: EstadoFormulario,
   fd: FormData,
 ): Promise<EstadoFormulario> {
   const valores = valoresDe(fd, ["empresaId", "planId", "referencia"]);
-  const datos = reactivarEmpresaSchema.safeParse(valores);
+  const datos = renovarEmpresaSchema.safeParse(valores);
   if (!datos.success) return { errores: primerError(datos.error), valores };
 
-  const r = await reactivarEmpresa(
+  const r = await renovarEmpresa(
     await obtenerActor(),
     datos.data,
     await reposPlataforma(),
@@ -172,12 +143,13 @@ export async function reactivarEmpresaAction(
       valores,
       error: mensajeError(r.error, {
         CONFLICT:
-          "El plan todavía no venció o ya hay una membresía para ese periodo. Recarga la página.",
+          "El plan todavía no está por vencer o ya hay una membresía para ese periodo. Recarga la página.",
+        LIMIT: "La empresa tiene más cuentas de las que permite ese plan.",
       }),
     };
   }
   refresh();
   return {
-    exito: `Empresa reactivada. Cubre del ${formatoFecha(r.value.inicio)} al ${formatoFecha(r.value.fin)}.`,
+    exito: `Empresa renovada. Cubre del ${formatoFecha(r.value.inicio)} al ${formatoFecha(r.value.fin)}.`,
   };
 }

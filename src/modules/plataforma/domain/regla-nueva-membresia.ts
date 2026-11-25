@@ -2,16 +2,21 @@ import { diasEntre, sumarDias, type FechaISO } from "@/shared/kernel/fechas";
 
 export const DIAS_MEMBRESIA = 30;
 
-// Antes del vencimiento o durante la gracia: empieza el día siguiente al fin actual.
-// Después de la gracia, o si nunca pagó: empieza el día del pago.
+// Antes del vencimiento: día siguiente al fin. En gracia: al terminar la gracia (esos días son gratis).
+// Pasada la gracia, si nunca pagó o si fue dada de baja: el día del pago.
 export function calcularInicioNuevaMembresia(
   finActual: FechaISO | null,
   hoy: FechaISO,
   diasGracia: number,
+  deBaja = false,
 ): FechaISO {
   if (finActual === null) return hoy;
   const diasVencida = diasEntre(finActual, hoy);
-  if (diasVencida <= diasGracia) return sumarDias(finActual, 1);
+  // Baja el mismo día: ese día ya está en el periodo anterior.
+  if (diasVencida <= 0) return sumarDias(finActual, 1);
+  if (!deBaja && diasVencida <= diasGracia) {
+    return sumarDias(finActual, diasGracia + 1);
+  }
   return hoy;
 }
 

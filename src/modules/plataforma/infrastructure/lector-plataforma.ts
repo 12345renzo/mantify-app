@@ -1,4 +1,5 @@
 import "server-only";
+import { hoyEn } from "@/shared/kernel/fechas";
 import { aDomainError } from "@/shared/supabase/errores";
 import type { SupabaseServidor } from "@/shared/supabase/server";
 import {
@@ -79,6 +80,7 @@ export function crearLectorPlataforma(db: SupabaseServidor): LectorPlataforma {
                 fechaFin: f.fecha_fin,
                 diasGracia: f.dias_gracia ?? 0,
                 motivoInactivacion: f.motivo_inactivacion,
+                cuentas: f.cuentas ?? 0,
               },
             ]
           : [],
@@ -90,13 +92,13 @@ export function crearLectorPlataforma(db: SupabaseServidor): LectorPlataforma {
         db
           .from("empresas")
           .select(
-            "id, nombre, razon_social, ruc, correo_contacto, plan_id, estado, dias_gracia, zona_horaria, motivo_inactivacion, precio_mensual, moneda",
+            "id, nombre, razon_social, ruc, correo_contacto, plan_id, estado, dias_gracia, zona_horaria, motivo_inactivacion",
           )
           .eq("id", id)
           .maybeSingle(),
         db
           .from("v_empresas_estado")
-          .select("estado, fecha_inicio, fecha_fin")
+          .select("estado, fecha_inicio, fecha_fin, plan_id, cuentas")
           .eq("empresa_id", id)
           .maybeSingle(),
         db
@@ -107,7 +109,7 @@ export function crearLectorPlataforma(db: SupabaseServidor): LectorPlataforma {
           .limit(50),
         db
           .from("membresias")
-          .select("id, fecha_inicio, fecha_fin")
+          .select("id, fecha_inicio, fecha_fin, plan_id, estado")
           .eq("empresa_id", id),
       ]);
       for (const r of [empresa, estado, pagos, membresias]) {
@@ -123,17 +125,28 @@ export function crearLectorPlataforma(db: SupabaseServidor): LectorPlataforma {
         ]),
       );
 
+      const planHoy = estado.data?.plan_id ?? e.plan_id;
+      const hoy = hoyEn(e.zona_horaria);
+      const proxima = (membresias.data ?? []).find(
+        (m) =>
+          m.estado === "VIGENTE" &&
+          m.fecha_inicio > hoy &&
+          m.plan_id !== planHoy,
+      );
+
       return {
         id: e.id,
         nombre: e.nombre,
         ruc: e.ruc,
-        planId: e.plan_id,
+        planId: planHoy,
+        proximoPlan: proxima
+          ? { planId: proxima.plan_id, desde: proxima.fecha_inicio }
+          : null,
+        cuentas: estado.data?.cuentas ?? 0,
         activa: e.estado === "ACTIVA",
         razonSocial: e.razon_social,
         correoContacto: e.correo_contacto,
         zonaHoraria: e.zona_horaria,
-        precioMensual: Number(e.precio_mensual),
-        moneda: e.moneda,
         diasGracia: e.dias_gracia,
         motivoInactivacion: e.motivo_inactivacion,
         estado: aEstado(estado.data?.estado ?? null),

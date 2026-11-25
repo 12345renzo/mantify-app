@@ -8,10 +8,10 @@ import { nombreCompleto } from "../domain/reglas-persona-cuenta";
 export function crearLectorIdentidad(db: SupabaseServidor): LectorIdentidad {
   return {
     async personal(empresaId): Promise<Personal | null> {
-      const [empresa, personas, cuentas, usados] = await Promise.all([
+      const [empresa, personas, cuentas, usados, tope] = await Promise.all([
         db
           .from("empresas")
-          .select("id, nombre, planes(max_accesos)")
+          .select("id, nombre")
           .eq("id", empresaId)
           .maybeSingle(),
         db
@@ -35,13 +35,13 @@ export function crearLectorIdentidad(db: SupabaseServidor): LectorIdentidad {
           .from("usuarios")
           .select("id", { count: "exact", head: true })
           .eq("empresa_id", empresaId),
+        db.rpc("cupo_cuentas", { p_empresa_id: empresaId }),
       ]);
-      for (const r of [empresa, personas, cuentas, usados]) {
+      for (const r of [empresa, personas, cuentas, usados, tope]) {
         if (r.error) throw aDomainError(r.error);
       }
       if (!empresa.data) return null;
 
-      const plan = empresa.data.planes as { max_accesos: number | null } | null;
       const filasPersonas = personas.data ?? [];
       const nombrePorId = new Map(
         filasPersonas.map((p) => [p.id, nombreCompleto(p)]),
@@ -54,7 +54,7 @@ export function crearLectorIdentidad(db: SupabaseServidor): LectorIdentidad {
 
       return {
         empresa: { id: empresa.data.id, nombre: empresa.data.nombre },
-        cupo: { usados: usados.count ?? 0, maximo: plan?.max_accesos ?? null },
+        cupo: { usados: usados.count ?? 0, maximo: tope.data ?? null },
         personas: filasPersonas.map((p) => ({
           id: p.id,
           nombres: p.nombres,

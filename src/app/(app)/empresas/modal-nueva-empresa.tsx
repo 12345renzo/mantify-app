@@ -139,7 +139,7 @@ function NuevaEmpresaForm({ planes }: { planes: Plan[] }) {
             max={30}
             step={1}
             required
-            defaultValue={v.diasGracia ?? "3"}
+            defaultValue={v.diasGracia ?? "1"}
             className={`${campo} tabular-nums`}
             aria-invalid={!!e.diasGracia || undefined}
           />

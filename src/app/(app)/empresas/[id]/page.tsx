@@ -5,11 +5,7 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { exigirSuperadminEnPagina } from "@/modules/acceso/infrastructure/sesion";
 import { obtenerEmpresa } from "@/modules/plataforma/application/consultas";
-import {
-  calcularFinMembresia,
-  calcularInicioNuevaMembresia,
-  DIAS_MEMBRESIA,
-} from "@/modules/plataforma/domain/regla-nueva-membresia";
+import { DIAS_MEMBRESIA } from "@/modules/plataforma/domain/regla-nueva-membresia";
 import { reposPlataforma } from "@/modules/plataforma/infrastructure";
 import { EstadoPill } from "@/modules/plataforma/ui/estado-pill";
 import { diasEntre, hoyEn } from "@/shared/kernel/fechas";
@@ -19,9 +15,9 @@ import {
   formatoFechaHora,
   formatoMoneda,
 } from "@/shared/ui/formato";
-import { IconoAtras, IconoEmpresa, IconoPago } from "@/shared/ui/iconos";
+import { IconoAtras, IconoEmpresa } from "@/shared/ui/iconos";
 import { Encabezado, Esqueleto } from "../../encabezado";
-import { CambiarEstadoForm, RegistrarPagoForm } from "./acciones-empresa";
+import { AccionesFila } from "../acciones-fila";
 import { CuentasEmpresa } from "./cuentas-empresa";
 
 export const metadata: Metadata = { title: "Empresa" };
@@ -71,13 +67,6 @@ async function Detalle({ params }: { params: Promise<{ id: string }> }) {
 
   const plan = planes.find((p) => p.id === empresa.planId);
   const hoy = hoyEn(empresa.zonaHoraria);
-  // Misma regla que usará el caso de uso al registrar: así la vista previa coincide con lo que se guarda.
-  const inicio = calcularInicioNuevaMembresia(
-    empresa.fechaFin,
-    hoy,
-    empresa.diasGracia,
-  );
-  const fin = calcularFinMembresia(inicio);
   const dias = empresa.fechaFin ? diasEntre(hoy, empresa.fechaFin) : null;
   const usados = empresa.fechaInicio
     ? Math.min(
@@ -159,15 +148,23 @@ async function Detalle({ params }: { params: Promise<{ id: string }> }) {
                 empresa quede al día.
               </p>
             )}
+            {empresa.proximoPlan && (
+              <p className="mt-4 text-sm font-medium">
+                Pasa a{" "}
+                {planes.find((p) => p.id === empresa.proximoPlan?.planId)
+                  ?.nombre ?? "otro plan"}{" "}
+                el {formatoFecha(empresa.proximoPlan.desde)}.
+              </p>
+            )}
             {!empresa.activa && (
               <p className="mt-4 rounded-lg border border-border bg-surface-2/70 px-3.5 py-2.5 text-sm text-muted">
                 <span className="font-semibold text-fg">
-                  Empresa desactivada
+                  Empresa dada de baja
                 </span>
                 {empresa.motivoInactivacion === "VENCIMIENTO"
                   ? " por falta de pago"
                   : " manualmente"}
-                . Sus usuarios no pueden entrar hasta que la actives.
+                . Sus usuarios no pueden entrar hasta que renueve.
               </p>
             )}
           </section>
@@ -243,57 +240,10 @@ async function Detalle({ params }: { params: Promise<{ id: string }> }) {
 
         <div className="flex min-w-0 flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
           <section className={`${tarjeta} p-5 sm:p-6`}>
-            <div className="flex items-center gap-3">
-              <span className="grid size-9 place-items-center rounded-lg bg-primary-soft text-primary">
-                <IconoPago width={18} height={18} />
-              </span>
-              <div>
-                <h2 className="text-base font-semibold tracking-[-0.02em]">
-                  Registrar pago
-                </h2>
-                <p className="font-mono text-[9.5px] tracking-[0.12em] text-muted uppercase">
-                  30 días de membresía
-                </p>
-              </div>
-            </div>
-            <dl className="mt-4 flex flex-col gap-2 rounded-lg border border-border bg-surface-2/40 p-3.5 text-sm">
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted">Monto de la empresa</dt>
-                <dd className="font-semibold tabular-nums">
-                  {formatoMoneda(empresa.precioMensual, empresa.moneda)}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted">Cubrirá</dt>
-                <dd className="text-right text-xs tabular-nums sm:text-sm">
-                  {formatoFecha(inicio)} – {formatoFecha(fin)}
-                </dd>
-              </div>
-            </dl>
-            <RegistrarPagoForm empresaId={empresa.id} />
-            {!empresa.activa && (
-              <p className="mt-3 text-xs text-muted">
-                La empresa sigue desactivada después del pago. Actívala abajo.
-              </p>
-            )}
-          </section>
-
-          <section className={`${tarjeta} p-5 sm:p-6`}>
-            <h2 className="text-base font-semibold tracking-[-0.02em]">
-              Estado de la empresa
+            <h2 className="mb-3 text-base font-semibold tracking-[-0.02em]">
+              Acciones
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">
-              {empresa.activa
-                ? "Desactivar bloquea el acceso de todos sus usuarios."
-                : "Activar devuelve el acceso a sus usuarios si la membresía está vigente."}
-            </p>
-            {/* key: al cambiar de estado se reinicia el formulario (si no, reaparece la confirmación anterior). */}
-            <CambiarEstadoForm
-              key={empresa.activa ? "activa" : "inactiva"}
-              empresaId={empresa.id}
-              activa={empresa.activa}
-              vencida={empresa.estado === "VENCIDA"}
-            />
+            <AccionesFila empresa={empresa} planes={planes} hoy={hoy} />
           </section>
 
           <section className={`${tarjeta} p-5 sm:p-6`}>

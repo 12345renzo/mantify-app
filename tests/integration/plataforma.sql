@@ -81,3 +81,47 @@ begin
 
   raise exception 'RESULTADOS (todo revertido): %', v_res;
 end $$;
+
+-- Baja, cambio de plan y tope de cuentas. Mismo uso: todo se revierte con RAISE EXCEPTION.
+-- Esperado: tope=10; hoy=PRO; 11 cuentas no permiten Estándar (ok); baja: fin=hoy, futuras anuladas=1, estado INACTIVA.
+do $$
+declare
+  v_std uuid; v_pro uuid; v_emp uuid; v_res text := ''; v_u uuid;
+  v_hoy date := (now() at time zone 'America/Lima')::date;
+begin
+  select id into v_std from public.planes where codigo = 'ESTANDAR';
+  select id into v_pro from public.planes where codigo = 'PRO';
+  insert into public.empresas (nombre, ruc, slug, plan_id) values ('Prueba B', '20999999990', 'prueba-b', v_pro) returning id into v_emp;
+  insert into public.membresias (empresa_id, plan_id, fecha_inicio, fecha_fin, monto)
+    values (v_emp, v_pro, v_hoy - 25, v_hoy + 4, 450);
+
+  perform set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002","role":"authenticated","app_metadata":{"rol":"SUPERADMIN"}}', true);
+  execute 'set local role authenticated';
+  perform public.reactivar_empresa(v_emp, v_std, v_hoy + 5, v_hoy + 34, 'OP');
+  v_res := v_res || format('tope=%s; hoy=%s; ', public.cupo_cuentas(v_emp),
+    (select p.codigo from public.v_empresas_estado v join public.planes p on p.id = v.plan_id where v.empresa_id = v_emp));
+  perform public.dar_de_baja_empresa(v_emp, 'MANUAL');
+  v_res := v_res || format('baja: fin_hoy=%s anuladas=%s estado=%s tope=%s; ',
+    (select max(fecha_fin) = v_hoy from public.membresias where empresa_id = v_emp and estado = 'VIGENTE'),
+    (select count(*) from public.membresias where empresa_id = v_emp and estado = 'ANULADA'),
+    (select estado from public.v_empresas_estado where empresa_id = v_emp),
+    public.cupo_cuentas(v_emp));
+  execute 'reset role';
+
+  -- 11 cuentas en una empresa Pro: no puede pasar a Estándar.
+  update public.empresas set plan_id = v_pro where id = v_emp;
+  for i in 1..11 loop
+    v_u := gen_random_uuid();
+    insert into auth.users (id, email) values (v_u, 'prueba' || i || '@cupo.test');
+    insert into public.usuarios (id, empresa_id, rol, correo) values (v_u, v_emp, 'TECNICO', 'prueba' || i || '@cupo.test');
+  end loop;
+  execute 'set local role authenticated';
+  begin
+    perform public.reactivar_empresa(v_emp, v_std, v_hoy + 1, v_hoy + 30, '');
+    v_res := v_res || 'FALLA bajó a Estándar con 11 cuentas; ';
+  exception when sqlstate 'MT001' then v_res := v_res || 'ok 11 cuentas no permiten Estándar; ';
+  end;
+  execute 'reset role';
+
+  raise exception 'RESULTADOS (todo revertido): %', v_res;
+end $$;

@@ -33,6 +33,10 @@ export function calcularEstadoMembresia(
   return "VENCIDA";
 }
 
+export function puedeRenovar(estado: EstadoMembresia): boolean {
+  return estado !== "AL_DIA";
+}
+
 export function empresaActiva(estado: EstadoMembresia): boolean {
   return (
     estado === "AL_DIA" || estado === "POR_VENCER" || estado === "EN_GRACIA"
