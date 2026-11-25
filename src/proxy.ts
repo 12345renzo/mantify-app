@@ -13,6 +13,7 @@ const PROTEGIDAS = [
   "/trabajos",
   "/preventivos",
   "/paradas",
+  "/engrase",
 ];
 
 // Refresca la sesión de Supabase en cada petición y hace la revisión optimista de rutas privadas.

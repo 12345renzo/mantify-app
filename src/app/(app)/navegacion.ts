@@ -128,7 +128,8 @@ export const NAVEGACION: GrupoNav[] = [
         descripcion: "Puntos por equipo y umbral.",
         icono: IconoGota,
         color: "var(--mod-engrase)",
-        corte: 8,
+        href: "/engrase",
+        roles: ROLES_EMPRESA,
       },
       {
         etiqueta: "Neumáticos",

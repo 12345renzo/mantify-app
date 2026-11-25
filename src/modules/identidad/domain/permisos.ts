@@ -36,7 +36,10 @@ export type Recurso =
   | "trabajos"
   | "informes_validados"
   | "informes_sin_validar"
-  | "reportes";
+  | "reportes"
+  // Plan y registros de engrase. El aviso de la empresa va aparte: solo el planificador.
+  | "engrase"
+  | "aviso_engrase";
 
 const TODO: Accion[] = ["leer", "crear", "editar", "dar_baja"];
 const ESCRIBIR: Accion[] = ["leer", "crear", "editar"];
@@ -55,6 +58,8 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     informes_validados: LEER,
     informes_sin_validar: LEER,
     reportes: LEER,
+    engrase: ESCRIBIR,
+    aviso_engrase: ["leer", "editar"],
   },
   SUPERVISOR: {
     personas: LEER,
@@ -66,9 +71,16 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     informes_validados: LEER,
     informes_sin_validar: LEER,
     reportes: LEER,
+    engrase: ESCRIBIR,
   },
   // El técnico no ve el estado de la flota ni informes sin validar.
-  TECNICO: { catalogos: LEER, trabajos: ESCRIBIR, informes_validados: LEER },
+  // Registra engrases ("crear"), pero no edita planes.
+  TECNICO: {
+    catalogos: LEER,
+    trabajos: ESCRIBIR,
+    informes_validados: LEER,
+    engrase: ["leer", "crear"],
+  },
   // El gerente solo lee.
   GERENTE: {
     personas: LEER,
@@ -80,6 +92,7 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     informes_validados: LEER,
     informes_sin_validar: LEER,
     reportes: LEER,
+    engrase: LEER,
   },
 };
 

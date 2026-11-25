@@ -21,6 +21,8 @@ const RECURSOS: Recurso[] = [
   "informes_validados",
   "informes_sin_validar",
   "reportes",
+  "engrase",
+  "aviso_engrase",
 ];
 
 // Matriz esperada escrita a mano: si alguien cambia permisos.ts, esta prueba lo obliga a decidirlo aquí.
@@ -37,6 +39,8 @@ const ESPERADO: Record<Rol, Partial<Record<Recurso, string>>> = {
     informes_validados: "L",
     informes_sin_validar: "L",
     reportes: "L",
+    engrase: "LCE",
+    aviso_engrase: "LE",
   },
   SUPERVISOR: {
     personas: "L",
@@ -47,8 +51,14 @@ const ESPERADO: Record<Rol, Partial<Record<Recurso, string>>> = {
     informes_validados: "L",
     informes_sin_validar: "L",
     reportes: "L",
+    engrase: "LCE",
   },
-  TECNICO: { catalogos: "L", trabajos: "LCE", informes_validados: "L" },
+  TECNICO: {
+    catalogos: "L",
+    trabajos: "LCE",
+    informes_validados: "L",
+    engrase: "LC",
+  },
   GERENTE: {
     personas: "L",
     cuentas: "L",
@@ -59,6 +69,7 @@ const ESPERADO: Record<Rol, Partial<Record<Recurso, string>>> = {
     informes_validados: "L",
     informes_sin_validar: "L",
     reportes: "L",
+    engrase: "L",
   },
 };
 const LETRA: Record<Accion, string> = {

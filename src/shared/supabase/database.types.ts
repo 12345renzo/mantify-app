@@ -669,6 +669,8 @@ export type Database = {
           correo_contacto: string | null;
           creado_en: string;
           dias_gracia: number;
+          engrase_aviso_tipo: string;
+          engrase_aviso_valor: number;
           estado: string;
           id: string;
           inactivada_en: string | null;
@@ -689,6 +691,8 @@ export type Database = {
           correo_contacto?: string | null;
           creado_en?: string;
           dias_gracia?: number;
+          engrase_aviso_tipo?: string;
+          engrase_aviso_valor?: number;
           estado?: string;
           id?: string;
           inactivada_en?: string | null;
@@ -709,6 +713,8 @@ export type Database = {
           correo_contacto?: string | null;
           creado_en?: string;
           dias_gracia?: number;
+          engrase_aviso_tipo?: string;
+          engrase_aviso_valor?: number;
           estado?: string;
           id?: string;
           inactivada_en?: string | null;
@@ -1505,6 +1511,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      planes_engrase: {
+        Row: {
+          actualizado_en: string;
+          actualizado_por: string | null;
+          cada_dias: number | null;
+          cada_horas: number | null;
+          creado_en: string;
+          creado_por: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          id: string;
+          tipo_grasa_id: string;
+        };
+        Insert: {
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          cada_dias?: number | null;
+          cada_horas?: number | null;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          id?: string;
+          tipo_grasa_id: string;
+        };
+        Update: {
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          cada_dias?: number | null;
+          cada_horas?: number | null;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id?: string;
+          equipo_id?: string;
+          id?: string;
+          tipo_grasa_id?: string;
+        };
+        Relationships: [];
+      };
       plantillas_actividades: {
         Row: {
           activo: boolean;
@@ -1725,6 +1770,114 @@ export type Database = {
             referencedColumns: ["empresa_id"];
           },
         ];
+      };
+      puntos_engrase: {
+        Row: {
+          activo: boolean;
+          actualizado_en: string;
+          actualizado_por: string | null;
+          creado_en: string;
+          creado_por: string | null;
+          descripcion: string;
+          empresa_id: string;
+          equipo_id: string;
+          id: string;
+          orden: number;
+        };
+        Insert: {
+          activo?: boolean;
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          creado_en?: string;
+          creado_por?: string | null;
+          descripcion: string;
+          empresa_id: string;
+          equipo_id: string;
+          id?: string;
+          orden?: number;
+        };
+        Update: {
+          activo?: boolean;
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          creado_en?: string;
+          creado_por?: string | null;
+          descripcion?: string;
+          empresa_id?: string;
+          equipo_id?: string;
+          id?: string;
+          orden?: number;
+        };
+        Relationships: [];
+      };
+      registros_engrase: {
+        Row: {
+          clave: string;
+          completo: boolean;
+          creado_en: string;
+          creado_por: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          fecha: string;
+          horometro: number;
+          id: string;
+          observacion: string | null;
+          tipo_grasa_id: string;
+        };
+        Insert: {
+          clave: string;
+          completo: boolean;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          fecha: string;
+          horometro: number;
+          id?: string;
+          observacion?: string | null;
+          tipo_grasa_id: string;
+        };
+        Update: {
+          clave?: string;
+          completo?: boolean;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id?: string;
+          equipo_id?: string;
+          fecha?: string;
+          horometro?: number;
+          id?: string;
+          observacion?: string | null;
+          tipo_grasa_id?: string;
+        };
+        Relationships: [];
+      };
+      registros_engrase_puntos: {
+        Row: {
+          descripcion: string;
+          empresa_id: string;
+          engrasado: boolean;
+          id: string;
+          orden: number;
+          registro_id: string;
+        };
+        Insert: {
+          descripcion: string;
+          empresa_id: string;
+          engrasado: boolean;
+          id?: string;
+          orden?: number;
+          registro_id: string;
+        };
+        Update: {
+          descripcion?: string;
+          empresa_id?: string;
+          engrasado?: boolean;
+          id?: string;
+          orden?: number;
+          registro_id?: string;
+        };
+        Relationships: [];
       };
       reportes_mantenimiento: {
         Row: {
@@ -2690,6 +2843,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      guardar_plan_engrase: {
+        Args: { p_datos: Json; p_equipo: string };
+        Returns: undefined;
+      };
       importar_paradas: { Args: { p_filas: Json }; Returns: Json };
       iniciar_parada: {
         Args: {
@@ -2742,6 +2899,23 @@ export type Database = {
           p_prev: string;
         };
         Returns: undefined;
+      };
+      engrase_equipos: {
+        Args: { p_equipo?: string };
+        Returns: {
+          cada_dias: number | null;
+          cada_horas: number | null;
+          categoria_id: string;
+          codigo: string;
+          horometro: number;
+          id: string;
+          tipo_grasa_id: string | null;
+          tipo_medidor: string;
+          ultimo_fecha: string | null;
+          ultimo_horometro: number | null;
+          ultimo_registro_fecha: string | null;
+          ultimo_registro_horometro: number | null;
+        }[];
       };
       equipos_para_preventivos: {
         Args: never;
@@ -2840,6 +3014,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      configurar_aviso_engrase: {
+        Args: { p_tipo: string; p_valor: number };
+        Returns: undefined;
+      };
       crear_backlog: {
         Args: { p_clave: string; p_datos: Json; p_fotos: string[] };
         Returns: string;
@@ -2920,6 +3098,10 @@ export type Database = {
         Returns: undefined;
       };
       registrar_ingreso: { Args: never; Returns: undefined };
+      registrar_engrase: {
+        Args: { p_clave: string; p_datos: Json; p_equipo: string };
+        Returns: string;
+      };
       registrar_pago_manual: {
         Args: {
           p_empresa_id: string;

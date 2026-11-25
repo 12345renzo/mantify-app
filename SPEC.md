@@ -1,37 +1,37 @@
 # Spec: Mantify — Corte 8: Engrase — V1
 
-Estado: **aprobada**. Base: `cortes/08-engrase.md` y `cortes/ESTANDARES.md`.
+Estado: **aprobada; construida salvo el E2E en Firefox** (2026-11-25). Base: `cortes/08-engrase.md` y `cortes/ESTANDARES.md`.
 Donde este documento difiere del corte 8, manda este (ver "Diferencias con el corte 8").
 
 ## 1. Objetivo
 
 Saber qué equipos necesitan engrase y dejar registro de lo que se engrasó.
 
-| Rol | Qué hace |
-| --- | --- |
+| Rol          | Qué hace                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------- |
 | Planificador | Define el plan por equipo; registra engrases; **único que cambia el aviso de su empresa** |
-| Supervisor | Define el plan por equipo; registra engrases |
-| Técnico | Ve el estado de engrase y registra engrases |
-| Gerente | Solo lee |
-| Superadmin | Nada: no tiene pantalla ni acción de engrase; la empresa nace con el aviso por defecto |
+| Supervisor   | Define el plan por equipo; registra engrases                                              |
+| Técnico      | Ve el estado de engrase y registra engrases                                               |
+| Gerente      | Solo lee                                                                                  |
+| Superadmin   | Nada: no tiene pantalla ni acción de engrase; la empresa nace con el aviso por defecto    |
 
 ## 2. Lo que ya existe (cortes 1 a 7)
 
-| Pieza | Dónde | Uso en el corte 8 |
-| --- | --- | --- |
-| `equipos.requiere_engrase` y su casilla en el formulario | corte 4, `equipos/modales-equipo.tsx` | Filtro del listado. **No** se crea `marcar-no-requiere-engrase.ts` |
-| Catálogo `tipos_grasa` | corte 3 | Grasa del plan y del registro |
-| Catálogo `plantillas_puntos_engrase` (categoría opcional) | corte 3 | Puntos propuestos |
-| `lecturas_horometro.origen_tipo` ya admite `ENGRASE` | corte 4 | Hay que permitirlo al técnico en el trigger `lecturas_antes_insert` |
-| `categorias_equipo.tipo_medidor` (HORAS / KILOMETROS) | corte 3 | Etiqueta "h" o "km" |
-| Motivo de parada `ENGRASE`; `generaEngrase` marcado como pendiente | corte 7 | Ver Diferido |
-| Permisos `puede(rol, accion, recurso)` | `identidad/domain/permisos.ts` | Recurso nuevo `engrase` |
-| `equipos_para_preventivos()` (el técnico no puede leer `equipos`) | corte 6 | Mismo patrón para engrase |
-| Escrituras por funciones `security definer` con clave de idempotencia | cortes 5 a 7 | Mismo patrón |
-| `hoyEn(zona)`, `diasEntre`, `sumarDias` | `shared/kernel` | Cálculo de vencimiento |
-| `parsearHorometro`, `HOROMETRO_MAX` | `equipos/domain/horometro.ts` | Validación |
-| `Modal`, paginación, `IconoGota`, `--mod-engrase` | `shared/ui` | Pantalla |
-| Entrada "Engrase" en el menú con `corte: 8` | `app/(app)/navegacion.ts` | Se activa con `href` |
+| Pieza                                                                 | Dónde                                 | Uso en el corte 8                                                   |
+| --------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| `equipos.requiere_engrase` y su casilla en el formulario              | corte 4, `equipos/modales-equipo.tsx` | Filtro del listado. **No** se crea `marcar-no-requiere-engrase.ts`  |
+| Catálogo `tipos_grasa`                                                | corte 3                               | Grasa del plan y del registro                                       |
+| Catálogo `plantillas_puntos_engrase` (categoría opcional)             | corte 3                               | Puntos propuestos                                                   |
+| `lecturas_horometro.origen_tipo` ya admite `ENGRASE`                  | corte 4                               | Hay que permitirlo al técnico en el trigger `lecturas_antes_insert` |
+| `categorias_equipo.tipo_medidor` (HORAS / KILOMETROS)                 | corte 3                               | Etiqueta "h" o "km"                                                 |
+| Motivo de parada `ENGRASE`; `generaEngrase` marcado como pendiente    | corte 7                               | Ver Diferido                                                        |
+| Permisos `puede(rol, accion, recurso)`                                | `identidad/domain/permisos.ts`        | Recurso nuevo `engrase`                                             |
+| `equipos_para_preventivos()` (el técnico no puede leer `equipos`)     | corte 6                               | Mismo patrón para engrase                                           |
+| Escrituras por funciones `security definer` con clave de idempotencia | cortes 5 a 7                          | Mismo patrón                                                        |
+| `hoyEn(zona)`, `diasEntre`, `sumarDias`                               | `shared/kernel`                       | Cálculo de vencimiento                                              |
+| `parsearHorometro`, `HOROMETRO_MAX`                                   | `equipos/domain/horometro.ts`         | Validación                                                          |
+| `Modal`, paginación, `IconoGota`, `--mod-engrase`                     | `shared/ui`                           | Pantalla                                                            |
+| Entrada "Engrase" en el menú con `corte: 8`                           | `app/(app)/navegacion.ts`             | Se activa con `href`                                                |
 
 No existe ninguna tabla, función ni módulo de engrase.
 
@@ -39,13 +39,13 @@ No existe ninguna tabla, función ni módulo de engrase.
 
 ### 3.1 Datos
 
-| Tabla | Campos propios (además de `empresa_id` y auditoría) | Reglas |
-| --- | --- | --- |
-| `planes_engrase` | `equipo_id`, `cada_horas?`, `cada_dias?`, `tipo_grasa_id` | Uno por equipo; al menos una frecuencia; horas > 0 y ≤ 100000; días 1 a 3650 |
-| `puntos_engrase` | `equipo_id`, `descripcion`, `orden`, `activo` | 1 a 200 caracteres; sin borrado, se desactivan |
-| `registros_engrase` | `equipo_id`, `fecha`, `horometro`, `tipo_grasa_id`, `completo`, `observacion?`, `clave` | Solo inserciones; `unique (empresa_id, clave)`; CHECK `completo or observacion de 3 caracteres o más`; observación máx. 500 |
-| `registros_engrase_puntos` | `registro_id`, `descripcion`, `orden`, `engrasado` | Solo inserciones; guarda **copia del texto**, así el historial no cambia al editar puntos |
-| `empresas` | `engrase_aviso_tipo` (`PORCENTAJE`/`HORAS`/`DIAS`), `engrase_aviso_valor` | `not null`, por defecto PORCENTAJE 20 (también las empresas existentes); porcentaje 1 a 100, horas 1 a 100000, días 1 a 3650; enteros |
+| Tabla                      | Campos propios (además de `empresa_id` y auditoría)                                     | Reglas                                                                                                                                |
+| -------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `planes_engrase`           | `equipo_id`, `cada_horas?`, `cada_dias?`, `tipo_grasa_id`                               | Uno por equipo; al menos una frecuencia; horas > 0 y ≤ 100000; días 1 a 3650                                                          |
+| `puntos_engrase`           | `equipo_id`, `descripcion`, `orden`, `activo`                                           | 1 a 200 caracteres; sin borrado, se desactivan                                                                                        |
+| `registros_engrase`        | `equipo_id`, `fecha`, `horometro`, `tipo_grasa_id`, `completo`, `observacion?`, `clave` | Solo inserciones; `unique (empresa_id, clave)`; CHECK `completo or observacion de 3 caracteres o más`; observación máx. 500           |
+| `registros_engrase_puntos` | `registro_id`, `descripcion`, `orden`, `engrasado`                                      | Solo inserciones; guarda **copia del texto**, así el historial no cambia al editar puntos                                             |
+| `empresas`                 | `engrase_aviso_tipo` (`PORCENTAJE`/`HORAS`/`DIAS`), `engrase_aviso_valor`               | `not null`, por defecto PORCENTAJE 20 (también las empresas existentes); porcentaje 1 a 100, horas 1 a 100000, días 1 a 3650; enteros |
 
 FKs compuestas `(x_id, empresa_id)` como en el resto. Se crea con `execute_sql` (sin migraciones) y se actualiza `database.types.ts`.
 
@@ -53,12 +53,12 @@ FKs compuestas `(x_id, empresa_id)` como en el resto. Se crea con `execute_sql` 
 
 **Funciones** (`security definer`, `search_path = ''`, revisan empresa activa, rol y equipo):
 
-| Función | Roles | Hace |
-| --- | --- | --- |
-| `guardar_plan_engrase(p_equipo, p_datos)` | Planificador, supervisor | Crea o edita el plan y sus puntos en una transacción |
+| Función                                         | Roles                             | Hace                                                                                                    |
+| ----------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `guardar_plan_engrase(p_equipo, p_datos)`       | Planificador, supervisor          | Crea o edita el plan y sus puntos en una transacción                                                    |
 | `registrar_engrase(p_equipo, p_datos, p_clave)` | Planificador, supervisor, técnico | Bloquea el equipo, valida, calcula `completo`, inserta registro y puntos, sube el horómetro si es mayor |
-| `configurar_aviso_engrase(p_tipo, p_valor)` | **Solo planificador** | Cambia esas dos columnas, y solo de su propia empresa (la toma de la sesión, no recibe `empresa_id`) |
-| `engrase_equipos()` | Los 4 roles | Una consulta: equipos activos con `requiere_engrase`, lectura actual, plan y último registro completo |
+| `configurar_aviso_engrase(p_tipo, p_valor)`     | **Solo planificador**             | Cambia esas dos columnas, y solo de su propia empresa (la toma de la sesión, no recibe `empresa_id`)    |
+| `engrase_equipos()`                             | Los 4 roles                       | Una consulta: equipos activos con `requiere_engrase`, lectura actual, plan y último registro completo   |
 
 ### 3.2 Reglas de dominio (puras)
 
@@ -75,11 +75,11 @@ FKs compuestas `(x_id, empresa_id)` como en el resto. Se crea con `execute_sql` 
 
 Margen según el umbral:
 
-| Tipo | Margen en horas | Margen en días |
-| --- | --- | --- |
+| Tipo       | Margen en horas      | Margen en días      |
+| ---------- | -------------------- | ------------------- |
 | PORCENTAJE | `cada_horas × v/100` | `cada_dias × v/100` |
-| HORAS | `v` | no avisa por días |
-| DIAS | no avisa por horas | `v` |
+| HORAS      | `v`                  | no avisa por días   |
+| DIAS       | no avisa por horas   | `v`                 |
 
 El estado no se guarda; se calcula al leer. "Hoy" sale del servidor en la zona de la empresa.
 
@@ -158,6 +158,7 @@ Cada server action: `obtenerActor()` → `schema.safeParse` → caso de uso con 
 ## 8. Pruebas
 
 **Unitarias** (primero, antes de la implementación):
+
 - Los 5 estados; cada umbral justo en el límite, un paso antes y un paso después.
 - PORCENTAJE, HORAS y DIAS; plan solo horas, solo días y ambos.
 - Registro completo, incompleto y sin puntos.
@@ -166,6 +167,7 @@ Cada server action: `obtenerActor()` → `schema.safeParse` → caso de uso con 
 - Permisos del recurso `engrase` por rol; el aviso, solo planificador.
 
 **Integración** (`tests/integration/engrase.sql`, bloque `do $$` que revierte todo):
+
 - Incompleto sin observación rechazado.
 - `update` y `delete` sobre registros y puntos rechazados para todos los roles.
 - Misma clave dos veces: un solo registro.
@@ -196,30 +198,33 @@ Cada server action: `obtenerActor()` → `schema.safeParse` → caso de uso con 
 ## 10. Límites
 
 **Siempre**
+
 - Validar en el servidor con Zod y volver a validar en la base.
 - RLS activa en toda tabla nueva; probar con otra empresa y con cada rol.
 - Probar en Firefox con la empresa de prueba, sin tocar datos reales.
 
 **Preguntar antes**
+
 - Cambios en tablas o funciones de cortes anteriores fuera de los dos previstos (columnas en `empresas`, `ENGRASE` en `lecturas_antes_insert`).
 - Agregar dependencias.
 - Commit o push.
 
 **Nunca**
+
 - Migraciones o CLI de Supabase; seeds o datos iniciales (el valor por defecto del umbral es la única excepción propuesta).
 - Clave de servicio en acciones de usuario.
 - Quitar o saltar pruebas existentes.
 
 ## 11. Diferencias con el corte 8
 
-| Corte 8 dice | Esta spec | Motivo |
-| --- | --- | --- |
-| `marcar-no-requiere-engrase.ts` | No se crea | Ya se hace al editar el equipo |
-| `supabase/migrations/` | `execute_sql` | Forma de trabajo acordada |
-| Un archivo por caso de uso | `casos-uso.ts` | Como está el código |
-| `calcularEstado(plan, ultimo, lectura, umbral)` | Agrega `hoy` | Dominio puro: no lee el reloj |
-| El umbral lo editan planificador o supervisor | Solo el planificador, con un botón en `/engrase` | Decisión tuya |
-| `importar-plan-engrase.ts` | Diferido | Está en la estructura pero no en el alcance, las pruebas ni los criterios |
+| Corte 8 dice                                    | Esta spec                                        | Motivo                                                                    |
+| ----------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
+| `marcar-no-requiere-engrase.ts`                 | No se crea                                       | Ya se hace al editar el equipo                                            |
+| `supabase/migrations/`                          | `execute_sql`                                    | Forma de trabajo acordada                                                 |
+| Un archivo por caso de uso                      | `casos-uso.ts`                                   | Como está el código                                                       |
+| `calcularEstado(plan, ultimo, lectura, umbral)` | Agrega `hoy`                                     | Dominio puro: no lee el reloj                                             |
+| El umbral lo editan planificador o supervisor   | Solo el planificador, con un botón en `/engrase` | Decisión tuya                                                             |
+| `importar-plan-engrase.ts`                      | Diferido                                         | Está en la estructura pero no en el alcance, las pruebas ni los criterios |
 
 ## 12. Diferido
 
@@ -232,22 +237,35 @@ Cada server action: `obtenerActor()` → `schema.safeParse` → caso de uso con 
 ## 13. Decisiones
 
 **Confirmadas por ti**
+
 - El aviso es por empresa y solo lo cambia el planificador, con un botón en `/engrase` que los demás no ven.
 - El superadmin no lo gestiona; solo existe el valor por defecto.
 
 **Aprobadas**
+
 1. Cumplida justo la frecuencia, ya está **vencido** (en preventivos el mismo día todavía no).
 2. Sin plan se puede registrar con los puntos de plantilla.
 3. Se mantienen los tres tipos de aviso, como pide el corte 8.
 4. Sin importación de planes en este corte.
 5. Los equipos desmovilizados salen en el listado.
 
-## 14. Antes de empezar
+## 14. Construido (2026-11-25)
+
+Ajustes que salieron al construir, dentro de lo aprobado:
+
+- El tipo de grasa es obligatorio en el plan y en cada registro. Sin tipos de grasa en Catálogos, los modales lo avisan y no dejan guardar.
+- El plan necesita al menos un punto (máx. 50). Si un punto se quita y luego se vuelve a agregar, se reactiva; no se borra nada.
+- El registro guarda la lista de puntos que correspondía en ese momento, con los que se marcaron, aunque el plan cambie después.
+- Las tablas de engrase no tienen permisos de escritura para usuarios; la regla de "solo inserciones" se cumple porque solo las funciones escriben y ninguna actualiza ni borra registros.
+- Se agregó `ENGRASE` a `lecturas_antes_insert` (solo desde la función). Probado con planificador, supervisor, técnico y otra empresa.
+- Recurso de permisos `aviso_engrase` aparte de `engrase`, para que solo el planificador cambie el aviso.
+
+## 15. Antes de empezar
 
 - `cortes/README.md` pide cerrar el corte anterior. Según las notas del 2026-11-19, los cortes 6 y 7 no tenían E2E corrido ni prueba tuya; hay commits posteriores, pero no verifiqué su estado.
 - El árbol de trabajo tiene cambios de membresía sin commit. Conviene commitearlos antes de empezar.
 
-## 15. Sugerencias para cortes anteriores (fuera de este corte)
+## 16. Sugerencias para cortes anteriores (fuera de este corte)
 
 - `ESTANDARES.md` §12 exige `defineAction`/`defineRoute` y una prueba que lo verifique; no encontré ninguno en `src/`. Hay que implementarlo o ajustar el estándar.
 - Ese mismo apartado pide límite de frecuencia por acción; revisar qué existe fuera del login.
