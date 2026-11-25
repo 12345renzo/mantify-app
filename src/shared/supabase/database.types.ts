@@ -903,6 +903,102 @@ export type Database = {
           },
         ];
       };
+      eventos_neumatico: {
+        Row: {
+          clave: string | null;
+          creado_en: string;
+          creado_por: string | null;
+          detalle: string | null;
+          empresa_id: string;
+          equipo_id: string | null;
+          horometro: number | null;
+          id: string;
+          neumatico_id: string;
+          posicion: string | null;
+          tipo: string;
+        };
+        Insert: {
+          clave?: string | null;
+          creado_en?: string;
+          creado_por?: string | null;
+          detalle?: string | null;
+          empresa_id: string;
+          equipo_id?: string | null;
+          horometro?: number | null;
+          id?: string;
+          neumatico_id: string;
+          posicion?: string | null;
+          tipo: string;
+        };
+        Update: {
+          clave?: string | null;
+          creado_en?: string;
+          creado_por?: string | null;
+          detalle?: string | null;
+          empresa_id?: string;
+          equipo_id?: string | null;
+          horometro?: number | null;
+          id?: string;
+          neumatico_id?: string;
+          posicion?: string | null;
+          tipo?: string;
+        };
+        Relationships: [];
+      };
+      instalaciones_neumatico: {
+        Row: {
+          cerrado_por: string | null;
+          cocada_montaje: number;
+          creado_en: string;
+          creado_por: string | null;
+          desmontado_en: string | null;
+          destino: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          horometro_desmontaje: number | null;
+          horometro_montaje: number;
+          id: string;
+          montado_en: string;
+          motivo_id: string | null;
+          neumatico_id: string;
+          posicion_id: string;
+        };
+        Insert: {
+          cerrado_por?: string | null;
+          cocada_montaje: number;
+          creado_en?: string;
+          creado_por?: string | null;
+          desmontado_en?: string | null;
+          destino?: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          horometro_desmontaje?: number | null;
+          horometro_montaje: number;
+          id?: string;
+          montado_en: string;
+          motivo_id?: string | null;
+          neumatico_id: string;
+          posicion_id: string;
+        };
+        Update: {
+          cerrado_por?: string | null;
+          cocada_montaje?: number;
+          creado_en?: string;
+          creado_por?: string | null;
+          desmontado_en?: string | null;
+          destino?: string | null;
+          empresa_id?: string;
+          equipo_id?: string;
+          horometro_desmontaje?: number | null;
+          horometro_montaje?: number;
+          id?: string;
+          montado_en?: string;
+          motivo_id?: string | null;
+          neumatico_id?: string;
+          posicion_id?: string;
+        };
+        Relationships: [];
+      };
       lecturas_horometro: {
         Row: {
           creado_en: string;
@@ -973,6 +1069,45 @@ export type Database = {
             referencedColumns: ["id", "empresa_id"];
           },
         ];
+      };
+      mediciones_neumatico: {
+        Row: {
+          centro: number;
+          empresa_id: string;
+          externo: number;
+          id: string;
+          interno: number;
+          neumatico_id: string;
+          posicion_id: string;
+          presion: number | null;
+          recapado: number;
+          sesion_id: string;
+        };
+        Insert: {
+          centro: number;
+          empresa_id: string;
+          externo: number;
+          id?: string;
+          interno: number;
+          neumatico_id: string;
+          posicion_id: string;
+          presion?: number | null;
+          recapado?: number;
+          sesion_id: string;
+        };
+        Update: {
+          centro?: number;
+          empresa_id?: string;
+          externo?: number;
+          id?: string;
+          interno?: number;
+          neumatico_id?: string;
+          posicion_id?: string;
+          presion?: number | null;
+          recapado?: number;
+          sesion_id?: string;
+        };
+        Relationships: [];
       };
       membresias: {
         Row: {
@@ -1167,6 +1302,66 @@ export type Database = {
             referencedColumns: ["empresa_id"];
           },
         ];
+      };
+      neumaticos: {
+        Row: {
+          actualizado_en: string;
+          actualizado_por: string | null;
+          cocada_nueva: number;
+          codigo: string;
+          costo: number | null;
+          costo_recapados: number;
+          creado_en: string;
+          creado_por: string | null;
+          empresa_id: string;
+          estado: string;
+          horas_acumuladas: number;
+          id: string;
+          marca: string;
+          medida: string;
+          modelo: string | null;
+          recapados: number;
+          version: number;
+        };
+        Insert: {
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          cocada_nueva: number;
+          codigo: string;
+          costo?: number | null;
+          costo_recapados?: number;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id: string;
+          estado?: string;
+          horas_acumuladas?: number;
+          id?: string;
+          marca: string;
+          medida: string;
+          modelo?: string | null;
+          recapados?: number;
+          version?: number;
+        };
+        Update: {
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          cocada_nueva?: number;
+          codigo?: string;
+          costo?: number | null;
+          costo_recapados?: number;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id?: string;
+          estado?: string;
+          horas_acumuladas?: number;
+          id?: string;
+          marca?: string;
+          medida?: string;
+          modelo?: string | null;
+          recapados?: number;
+          version?: number;
+        };
+        Relationships: [];
       };
       nombres_plan_preventivo: {
         Row: {
@@ -1391,6 +1586,54 @@ export type Database = {
             referencedColumns: ["membresia_id"];
           },
         ];
+      };
+      parametros_neumatico: {
+        Row: {
+          activo: boolean;
+          actualizado_en: string;
+          actualizado_por: string | null;
+          categoria_id: string | null;
+          cocada_alerta: number;
+          cocada_minima: number;
+          creado_en: string;
+          creado_por: string | null;
+          dias_sin_medir: number;
+          diferencia_maxima: number;
+          empresa_id: string;
+          equipo_id: string | null;
+          id: string;
+        };
+        Insert: {
+          activo?: boolean;
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          categoria_id?: string | null;
+          cocada_alerta: number;
+          cocada_minima: number;
+          creado_en?: string;
+          creado_por?: string | null;
+          dias_sin_medir: number;
+          diferencia_maxima: number;
+          empresa_id: string;
+          equipo_id?: string | null;
+          id?: string;
+        };
+        Update: {
+          activo?: boolean;
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          categoria_id?: string | null;
+          cocada_alerta?: number;
+          cocada_minima?: number;
+          creado_en?: string;
+          creado_por?: string | null;
+          dias_sin_medir?: number;
+          diferencia_maxima?: number;
+          empresa_id?: string;
+          equipo_id?: string | null;
+          id?: string;
+        };
+        Relationships: [];
       };
       personas: {
         Row: {
@@ -1771,6 +2014,48 @@ export type Database = {
           },
         ];
       };
+      posiciones_neumatico: {
+        Row: {
+          activo: boolean;
+          actualizado_en: string;
+          actualizado_por: string | null;
+          codigo: string;
+          creado_en: string;
+          creado_por: string | null;
+          eje: number;
+          empresa_id: string;
+          equipo_id: string;
+          id: string;
+          orden: number;
+        };
+        Insert: {
+          activo?: boolean;
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          codigo: string;
+          creado_en?: string;
+          creado_por?: string | null;
+          eje: number;
+          empresa_id: string;
+          equipo_id: string;
+          id?: string;
+          orden?: number;
+        };
+        Update: {
+          activo?: boolean;
+          actualizado_en?: string;
+          actualizado_por?: string | null;
+          codigo?: string;
+          creado_en?: string;
+          creado_por?: string | null;
+          eje?: number;
+          empresa_id?: string;
+          equipo_id?: string;
+          id?: string;
+          orden?: number;
+        };
+        Relationships: [];
+      };
       puntos_engrase: {
         Row: {
           activo: boolean;
@@ -2082,6 +2367,39 @@ export type Database = {
             referencedColumns: ["empresa_id"];
           },
         ];
+      };
+      sesiones_medicion_neumatico: {
+        Row: {
+          clave: string;
+          creado_en: string;
+          creado_por: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          fecha: string;
+          horometro: number;
+          id: string;
+        };
+        Insert: {
+          clave: string;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id: string;
+          equipo_id: string;
+          fecha: string;
+          horometro: number;
+          id?: string;
+        };
+        Update: {
+          clave?: string;
+          creado_en?: string;
+          creado_por?: string | null;
+          empresa_id?: string;
+          equipo_id?: string;
+          fecha?: string;
+          horometro?: number;
+          id?: string;
+        };
+        Relationships: [];
       };
       sistemas_mantenimiento: {
         Row: {
@@ -3096,6 +3414,93 @@ export type Database = {
       dar_de_baja_empresa: {
         Args: { p_empresa_id: string; p_motivo: string };
         Returns: undefined;
+      };
+      neumaticos_listado: {
+        Args: { p_id?: string };
+        Returns: {
+          categoria_id: string | null;
+          centro: number | null;
+          cocada_montaje: number | null;
+          cocada_nueva: number;
+          codigo: string;
+          costo: number | null;
+          costo_recapados: number | null;
+          equipo_codigo: string | null;
+          equipo_horometro: number | null;
+          equipo_id: string | null;
+          estado: string;
+          externo: number | null;
+          horas_acumuladas: number;
+          horometro_montaje: number | null;
+          id: string;
+          interno: number | null;
+          marca: string;
+          medicion_fecha: string | null;
+          medida: string;
+          medidor: string | null;
+          modelo: string | null;
+          montado_en: string | null;
+          posicion_codigo: string | null;
+          posicion_id: string | null;
+          presion: number | null;
+          recapados: number;
+        }[];
+      };
+      neumaticos_equipos: {
+        Args: never;
+        Returns: {
+          categoria_id: string;
+          codigo: string;
+          horometro: number;
+          id: string;
+          medidor: string;
+        }[];
+      };
+      guardar_neumatico: {
+        Args: { p_clave: string; p_datos: Json; p_id: string | null };
+        Returns: string;
+      };
+      definir_posiciones: {
+        Args: { p_equipo: string; p_posiciones: Json };
+        Returns: undefined;
+      };
+      guardar_umbrales: {
+        Args: {
+          p_categoria: string | null;
+          p_datos: Json | null;
+          p_equipo: string | null;
+        };
+        Returns: undefined;
+      };
+      montar_neumatico: {
+        Args: {
+          p_clave: string;
+          p_datos: Json;
+          p_neumatico: string;
+          p_posicion: string;
+        };
+        Returns: undefined;
+      };
+      desmontar_neumatico: {
+        Args: { p_clave: string; p_datos: Json; p_neumatico: string };
+        Returns: undefined;
+      };
+      rotar_neumaticos: {
+        Args: {
+          p_clave: string;
+          p_datos: Json;
+          p_destino: string;
+          p_origen: string;
+        };
+        Returns: undefined;
+      };
+      recapar_neumatico: {
+        Args: { p_clave: string; p_datos: Json; p_neumatico: string };
+        Returns: undefined;
+      };
+      medir_neumaticos: {
+        Args: { p_clave: string; p_datos: Json; p_equipo: string };
+        Returns: string;
       };
       registrar_ingreso: { Args: never; Returns: undefined };
       registrar_engrase: {

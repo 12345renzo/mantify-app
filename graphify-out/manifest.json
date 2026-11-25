@@ -192,10 +192,10 @@
     "semantic_hash": "9e06fab796039299a3554665e1240d7d"
   },
   "src/app/(app)/navegacion.ts": {
-    "mtime": 1795102633.12299,
-    "seen": 1795615326.1104138,
-    "ast_hash": "a019399231ce90e6ceebc8b7010f453b",
-    "semantic_hash": "a019399231ce90e6ceebc8b7010f453b"
+    "mtime": 1795628002.4573338,
+    "seen": 1795628684.832046,
+    "ast_hash": "f6b1df937554ea6f45e4148d91c8d136",
+    "semantic_hash": ""
   },
   "src/app/(app)/panel/page.tsx": {
     "mtime": 1795007293.7986279,
@@ -498,10 +498,10 @@
     "semantic_hash": "613ebdf7a2931ad718b3822b0cb09645"
   },
   "src/modules/identidad/domain/permisos.ts": {
-    "mtime": 1795016499.2834058,
-    "seen": 1795098680.3429487,
-    "ast_hash": "261b4d3ada3fcf897d13ade5621dabab",
-    "semantic_hash": "261b4d3ada3fcf897d13ade5621dabab"
+    "mtime": 1795626971.392096,
+    "seen": 1795628684.8335266,
+    "ast_hash": "022815b060e15db9ae76da05301d4be1",
+    "semantic_hash": ""
   },
   "src/modules/identidad/domain/reglas-persona-cuenta.ts": {
     "mtime": 1794935949.518559,
@@ -726,10 +726,10 @@
     "semantic_hash": "605ae195ef3d4c97b6f54a6d2fdd2cce"
   },
   "src/proxy.ts": {
-    "mtime": 1795102446.2237275,
-    "seen": 1795615326.1105416,
-    "ast_hash": "2d3457fe9c9feb7f91f83f48bfa43f3f",
-    "semantic_hash": "2d3457fe9c9feb7f91f83f48bfa43f3f"
+    "mtime": 1795628002.4574814,
+    "seen": 1795628684.8347094,
+    "ast_hash": "302e557d205ca8e831138d45dde5a89d",
+    "semantic_hash": ""
   },
   "src/shared/env/env.ts": {
     "mtime": 1794928525.9856703,
@@ -780,10 +780,10 @@
     "semantic_hash": "1a6469f7d16ce6ee3a1dd3040b634a21"
   },
   "src/shared/supabase/database.types.ts": {
-    "mtime": 1795619020.9782765,
-    "seen": 1795619232.4887397,
-    "ast_hash": "41ce727358879a00eafd2e1b3ee4b7c2",
-    "semantic_hash": "41ce727358879a00eafd2e1b3ee4b7c2"
+    "mtime": 1795627606.997758,
+    "seen": 1795628684.834903,
+    "ast_hash": "98e166b171cf9216f37da8addfece32d",
+    "semantic_hash": ""
   },
   "src/shared/supabase/errores.ts": {
     "mtime": 1795102446.2235975,
@@ -878,32 +878,32 @@
   "tests/integration/catalogos.sql": {
     "mtime": 1795013442.1847177,
     "seen": 1795098680.3429966,
-    "ast_hash": "984c281c76b8a732c30034e008b0cd8b",
-    "semantic_hash": "984c281c76b8a732c30034e008b0cd8b"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/integration/equipos.sql": {
     "mtime": 1795020059.6722977,
     "seen": 1795098680.3429973,
-    "ast_hash": "b090779f2b70d2ff29fee2d9dcddd45d",
-    "semantic_hash": "b090779f2b70d2ff29fee2d9dcddd45d"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/integration/identidad.sql": {
     "mtime": 1794935409.6449294,
     "seen": 1795098680.342998,
-    "ast_hash": "84da270e3a47473cfbd02b4631631607",
-    "semantic_hash": "84da270e3a47473cfbd02b4631631607"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/integration/plataforma.sql": {
     "mtime": 1795619087.6962266,
     "seen": 1795619232.488761,
-    "ast_hash": "f66a36b9b35c3fe0d17928263665bc1b",
-    "semantic_hash": "f66a36b9b35c3fe0d17928263665bc1b"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/integration/trabajos.sql": {
     "mtime": 1795096729.995083,
     "seen": 1795098680.3429992,
-    "ast_hash": "a9017c039671fe436756f3ba138c1abf",
-    "semantic_hash": "a9017c039671fe436756f3ba138c1abf"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/unit/catalogos.test.ts": {
     "mtime": 1795013610.294432,
@@ -936,10 +936,10 @@
     "semantic_hash": "9c4081667a036eb1e3390d0c2796ca7f"
   },
   "tests/unit/identidad-permisos.test.ts": {
-    "mtime": 1795016499.2902734,
-    "seen": 1795098680.3430061,
-    "ast_hash": "76e3cc9519edf932bc545c7fd120e689",
-    "semantic_hash": "76e3cc9519edf932bc545c7fd120e689"
+    "mtime": 1795626949.2952309,
+    "seen": 1795628684.8353508,
+    "ast_hash": "1609c67b21f8997146c2e7f83896ffe7",
+    "semantic_hash": ""
   },
   "tests/unit/importacion-equipos.test.ts": {
     "mtime": 1795017461.8418393,
@@ -1334,14 +1334,14 @@
   "tests/integration/paradas.sql": {
     "mtime": 1795102145.5638673,
     "seen": 1795615326.110572,
-    "ast_hash": "5bf1f46faa3015400e89b4ef41809bd3",
-    "semantic_hash": "5bf1f46faa3015400e89b4ef41809bd3"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/integration/preventivos.sql": {
     "mtime": 1795100268.8788817,
     "seen": 1795615326.110574,
-    "ast_hash": "aae380fc91c076f30b6014477e4fa9e6",
-    "semantic_hash": "aae380fc91c076f30b6014477e4fa9e6"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/unit/paradas.test.ts": {
     "mtime": 1795102737.377002,
@@ -1372,5 +1372,209 @@
     "seen": 1795619232.488694,
     "ast_hash": "5e5bf1b7b96ce8ebe6957904521f5a8c",
     "semantic_hash": "5e5bf1b7b96ce8ebe6957904521f5a8c"
+  },
+  "src/app/(app)/engrase/[id]/page.tsx": {
+    "mtime": 1795623275.9443583,
+    "seen": 1795624949.0186856,
+    "ast_hash": "2a1bc3dcc8bfcf7419b7dec921f8b90d",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/engrase/actions.ts": {
+    "mtime": 1795623228.6810079,
+    "seen": 1795624949.0186875,
+    "ast_hash": "d4a78c468a66b8c942ef212373063970",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/engrase/modales-engrase.tsx": {
+    "mtime": 1795623228.7249036,
+    "seen": 1795624949.0186887,
+    "ast_hash": "04f656d0b585b41ef906dc098fb34ef9",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/engrase/page.tsx": {
+    "mtime": 1795623228.748009,
+    "seen": 1795624949.0186899,
+    "ast_hash": "851c10a8f0151dc43b7fda1c4582a738",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/application/casos-uso.ts": {
+    "mtime": 1795622618.2976205,
+    "seen": 1795624949.019598,
+    "ast_hash": "e65cc12086331a801487e666b2567281",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/application/esquemas.ts": {
+    "mtime": 1795622547.541435,
+    "seen": 1795624949.0195994,
+    "ast_hash": "5efd18436754851c7da6e6dd6babd697",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/application/repositorios.ts": {
+    "mtime": 1795622617.8941534,
+    "seen": 1795624949.0196004,
+    "ast_hash": "ed269a63eac1cebdafe2f11880714faf",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/domain/estado-engrase.ts": {
+    "mtime": 1795622078.744711,
+    "seen": 1795624949.0196013,
+    "ast_hash": "63175422a01aee792622af81893bfc37",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/infrastructure/engrase-repositorio.ts": {
+    "mtime": 1795623123.2474084,
+    "seen": 1795624949.019602,
+    "ast_hash": "fd27c8610d2b4b71d6168ec89914a690",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/infrastructure/index.ts": {
+    "mtime": 1795623122.9101162,
+    "seen": 1795624949.0196033,
+    "ast_hash": "c58fd3be88986e2bc7a39dcf419877ea",
+    "semantic_hash": ""
+  },
+  "src/modules/engrase/ui/formato.ts": {
+    "mtime": 1795622453.3965702,
+    "seen": 1795624949.019604,
+    "ast_hash": "173b509544cd14b801b71480b00153c1",
+    "semantic_hash": ""
+  },
+  "tests/e2e/engrase.spec.ts": {
+    "mtime": 1795623467.8631988,
+    "seen": 1795624949.021538,
+    "ast_hash": "e46788dbacf661d41e8f6aba855177ea",
+    "semantic_hash": ""
+  },
+  "tests/unit/engrase.test.ts": {
+    "mtime": 1795623295.919786,
+    "seen": 1795624949.0216174,
+    "ast_hash": "bb8b931d6f625241a53a8fe9f6a64ff0",
+    "semantic_hash": ""
+  },
+  "SPEC.md": {
+    "mtime": 1795623486.3047996,
+    "seen": 1795624949.021856,
+    "ast_hash": "6e5223fb227bfe90b04bec0c254217a9",
+    "semantic_hash": ""
+  },
+  "tasks/plan.md": {
+    "mtime": 1795625515.7907624,
+    "seen": 1795628684.83592,
+    "ast_hash": "1236189cb5f5760d2a13761aa3bc4917",
+    "semantic_hash": ""
+  },
+  "tasks/todo.md": {
+    "mtime": 1795628180.6284583,
+    "seen": 1795628684.8359215,
+    "ast_hash": "8c2e79ac1f86fdbf90c26c09000e1824",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/neumaticos/[id]/page.tsx": {
+    "mtime": 1795628002.8121274,
+    "seen": 1795628684.8320482,
+    "ast_hash": "cb198e795295a622b6f621232d9dac5d",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/neumaticos/actions.ts": {
+    "mtime": 1795627866.9100738,
+    "seen": 1795628684.8320498,
+    "ast_hash": "86710d03bbe0095b562183c6ee97673a",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/neumaticos/equipo/[id]/page.tsx": {
+    "mtime": 1795628002.8741283,
+    "seen": 1795628684.8320513,
+    "ast_hash": "d79bd5efc548cb5dc72d86546915a74f",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/neumaticos/modales-neumatico.tsx": {
+    "mtime": 1795627925.654272,
+    "seen": 1795628684.8320525,
+    "ast_hash": "011c87e99bd4c52946b10c09d387c0c0",
+    "semantic_hash": ""
+  },
+  "src/app/(app)/neumaticos/page.tsx": {
+    "mtime": 1795628002.9403706,
+    "seen": 1795628684.8320532,
+    "ast_hash": "300cc0e235b3bf83b68df114647bca6b",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/application/casos-uso.ts": {
+    "mtime": 1795627745.2642882,
+    "seen": 1795628684.8337371,
+    "ast_hash": "14cd1e22ba87d1ddeb2ca1c2d99a17d6",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/application/esquemas.ts": {
+    "mtime": 1795627668.1343157,
+    "seen": 1795628684.8337388,
+    "ast_hash": "1004bd851395e85a3e2789acc51c4d5f",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/application/repositorios.ts": {
+    "mtime": 1795627668.1482584,
+    "seen": 1795628684.8337402,
+    "ast_hash": "a9d45b81155ec47368d36aeac8c0df90",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/domain/costos.ts": {
+    "mtime": 1795626971.689003,
+    "seen": 1795628684.8337417,
+    "ast_hash": "003d1a56f59c8adebadf1772a24b1736",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/domain/posiciones.ts": {
+    "mtime": 1795626971.3669977,
+    "seen": 1795628684.8337426,
+    "ast_hash": "8a25341d49357fe7f96a86d7400fa230",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/domain/salud.ts": {
+    "mtime": 1795626971.7100031,
+    "seen": 1795628684.8337438,
+    "ast_hash": "2f85c306d5f0770edeac22f41c9aea83",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/infrastructure/index.ts": {
+    "mtime": 1795627796.218048,
+    "seen": 1795628684.833745,
+    "ast_hash": "cce0d407eb21547cb6e487f7a7b89972",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/infrastructure/neumaticos-repositorio.ts": {
+    "mtime": 1795627813.0803525,
+    "seen": 1795628684.833746,
+    "ast_hash": "795f28a75d34e8aead7967e650827510",
+    "semantic_hash": ""
+  },
+  "src/modules/neumaticos/ui/formato.ts": {
+    "mtime": 1795627866.8907974,
+    "seen": 1795628684.8337467,
+    "ast_hash": "ae5ac2b7647d3baf824fcb835d3e39f5",
+    "semantic_hash": ""
+  },
+  "tests/e2e/neumaticos.spec.ts": {
+    "mtime": 1795628154.2663844,
+    "seen": 1795628684.835181,
+    "ast_hash": "a347b5f88c258f9b93d33e304710cdf7",
+    "semantic_hash": ""
+  },
+  "tests/unit/neumaticos.test.ts": {
+    "mtime": 1795627755.2570226,
+    "seen": 1795628684.8353841,
+    "ast_hash": "6d7f9339a663baa51af1975ac1040efc",
+    "semantic_hash": ""
+  },
+  "SPEC-corte9-neumaticos.md": {
+    "mtime": 1795628180.6797636,
+    "seen": 1795628684.83555,
+    "ast_hash": "c1f9f6fbb5d38d547e789e23cf894ad2",
+    "semantic_hash": ""
+  },
+  "package-lock.json": {
+    "mtime": 1795017267.9397862,
+    "seen": 1795624949.0221114,
+    "ast_hash": "d3bc496fbd8304e6fb55166f4972cb13",
+    "semantic_hash": ""
   }
 }

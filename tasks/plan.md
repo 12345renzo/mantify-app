@@ -1,46 +1,45 @@
-# Plan de implementación: Corte 8 — Engrase
+# Plan de implementación: Corte 9 — Neumáticos
 
-Spec de origen: `SPEC.md` (aprobada). Tareas: `tasks/todo.md`.
+Spec de origen: `SPEC-corte9-neumaticos.md` (aprobada). Tareas: `tasks/todo.md`.
+El plan del corte 8 está en git (`4347e2d`).
 
 ## Resumen
 
-Módulo `engrase` con la forma de `preventivos`: dominio puro, funciones SQL para escribir, y pantallas `/engrase` y `/engrase/[id]`. Se avanza por cortes verticales: primero ver, luego definir el plan, registrar, historial y aviso.
+Módulo `neumaticos` con la forma de `engrase`. Cortes verticales: stock → posiciones y mapa → umbrales y salud → montar y desmontar → medir → rotar y recapar → detalle y costos.
 
 ## Dependencias
 
 ```
 T1 dominio y permisos ─┐
-T2 tablas y RLS ───────┴─ T3 lectura ── T4 pantalla ── T5 plan ── T6 registrar ──┬─ T7 historial
-                                                                                 └─ T8 aviso ── T9 cierre
+T2 tablas y RLS ───────┴─ T3 stock ─ T4 posiciones y mapa ─ T5 umbrales ─ T6 montar/desmontar ─ T7 medir ─ T8 rotar/recapar ─ T9 detalle ─ T10 cierre
 ```
 
-T1 y T2 pueden ir en paralelo. El resto es secuencial porque comparte repositorio y acciones.
+T1 y T2 pueden ir en paralelo; el resto es secuencial.
 
-## Decisiones de arquitectura
+## Decisiones
 
-- El estado se calcula en el dominio al leer; la base no lo guarda.
-- Las 4 tablas no tienen políticas de escritura; se escribe por funciones `security definer`.
-- Una sola consulta (`engrase_equipos()`) alimenta el listado; filtro, orden y paginación se hacen en el servidor de la app, porque el estado no existe en la base.
-  Límite conocido: sirve para cientos de equipos; con miles habría que calcular el estado en SQL.
-- `registro completo` lo calcula la base. Los puntos efectivos se vuelven a leer en la base: el cliente solo dice cuáles marcó.
-- La base se crea con `execute_sql`; cada tarea agrega sus casos a `tests/integration/engrase.sql`.
-- Antes de escribir páginas o acciones, leer la guía de Next en `node_modules/next/dist/docs/` (AGENTS.md).
+- Salud, cocada, costo y proyección se calculan en el dominio al leer; no se guardan.
+- Permisos: `neumaticos` (`leer`; `crear` = operar: montar, rotar, desmontar, medir; `editar` = cargar, posiciones, recapar) y `umbrales_neumaticos` (solo planificador). El técnico tiene `leer` y `crear`.
+- Los valores de umbrales se leen con los 4 roles porque la salud los necesita; solo el planificador ve el botón y puede cambiarlos.
+- Costos: `neumaticos` no se lee directo; la función de lectura devuelve `null` al técnico. Los eventos nunca guardan costos.
+- Idempotencia: `eventos_neumatico` es única por `(empresa_id, clave, neumatico_id)`, porque rotar genera dos eventos con la misma clave.
+- Rotar cierra las dos instalaciones y abre dos nuevas en la misma transacción; así los índices parciales no chocan y queda el historial.
+- Cada medición guarda el número de recapado: la proyección y la cocada actual usan solo el ciclo vigente.
+- Cocada actual = el dato más reciente del ciclo (medición o montaje); si no hay, la nueva.
+- La base se crea con `execute_sql`; cada tarea agrega sus casos a `tests/integration/neumaticos.sql`.
+- Antes de escribir páginas o acciones, leer la guía de Next en `node_modules/next/dist/docs/`.
 
 ## Riesgos
 
-| Riesgo                                                                                         | Impacto | Cómo se cubre                                                                                                       |
-| ---------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| Cambiar `lecturas_antes_insert` rompe backlog, preventivo, parada o la corrección de horómetro | Alto    | Cambiar solo la lista de orígenes; volver a correr `trabajos.sql`, `preventivos.sql`, `paradas.sql` y `equipos.sql` |
-| Columnas nuevas en `empresas` afectan altas de empresa                                         | Medio   | Con `default`; correr `plataforma.sql` y las unitarias de plataforma                                                |
-| El MCP cancela SQL que contiene `delete`                                                       | Medio   | La prueba de "no se puede borrar" la corres tú en el SQL editor                                                     |
-| E2E sin `E2E_CLAVE`                                                                            | Medio   | Pedírtela antes de T9; sin ella queda escrito y sin correr, y se dice                                               |
-| La base es la real                                                                             | Alto    | Pruebas SQL que revierten todo; E2E solo en la empresa de prueba                                                    |
-
-## Estado previo
-
-- Los cambios de membresía ya están commiteados (`36d57bc menbresia`).
-- Falta confirmar que los cortes 6 y 7 estén cerrados (`cortes/README.md` lo pide).
+| Riesgo                                                                          | Impacto | Cómo se cubre                                                                          |
+| ------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------- |
+| Cambiar `lecturas_antes_insert` rompe horómetro, paradas, preventivos o engrase | Alto    | Solo agregar `NEUMATICO`; repetir la prueba corta de todos los caminos y `engrase.sql` |
+| Una cubierta o posición duplicada por carrera                                   | Alto    | Índices únicos parciales y `for update`                                                |
+| El técnico ve costos por otra vía (tabla, evento, respuesta)                    | Alto    | Sin `select` directo a `neumaticos`; prueba específica                                 |
+| El MCP cancela SQL con `delete`                                                 | Medio   | Las pruebas no usan `delete`; "no se puede borrar" lo corres tú                        |
+| E2E sin `E2E_CLAVE`                                                             | Medio   | Pedirla antes de T10; sin ella queda escrito y sin correr                              |
+| La base es la real                                                              | Alto    | Pruebas SQL que revierten todo; E2E solo en la empresa de prueba                       |
 
 ## Preguntas abiertas
 
-Ninguna de diseño. Solo `E2E_CLAVE` y el estado de los cortes 6 y 7.
+Ninguna de diseño.

@@ -1,116 +1,96 @@
-# Tareas: Corte 8 — Engrase
+# Tareas: Corte 9 — Neumáticos
 
 Verificación base de cada tarea: `npm run typecheck && npm run lint && npm run format:check && npm test`.
+Rutas relativas a `src/` salvo `tests/`.
 
 ## - [x] T1. Dominio y permisos (M)
 
 Pruebas primero.
 
 - Aceptación:
-  - Los 5 estados y los 3 tipos de aviso, justo en el límite, antes y después (criterios 1 y 2).
-  - Registro completo, horómetro del registro y puntos efectivos.
-  - Recurso `engrase`: planificador y supervisor todo; técnico lee y registra; gerente lee; superadmin nada. Solo planificador configura el aviso.
+  - Salud en el límite de cada umbral, umbral de equipo sobre categoría, sin umbral, desgaste irregular (criterios 1, 2, 3).
+  - Costo por hora (`null` sin horas o sin costo), proyección y plantilla a posiciones (criterio 6).
+  - Recursos `neumaticos` y `umbrales_neumaticos` según el plan.
 - Verificar: base.
 - Depende de: nada.
-- Archivos: `modules/engrase/domain/estado-engrase.ts`, `identidad/domain/permisos.ts`, `tests/unit/engrase.test.ts`, `tests/unit/identidad-permisos.test.ts`.
+- Archivos: `modules/neumaticos/domain/{salud,costos,posiciones}.ts`, `modules/identidad/domain/permisos.ts`, `tests/unit/{neumaticos,identidad-permisos}.test.ts`.
 
-## - [x] T2. Tablas, columnas y RLS (S)
+## - [x] T2. Tablas, índices y RLS (M)
 
 - Aceptación:
-  - 4 tablas con FKs compuestas, CHECK, `unique` y RLS de solo lectura por empresa.
-  - `empresas.engrase_aviso_tipo/valor` con 20 % por defecto, también en las existentes.
-  - `database.types.ts` actualizado.
-- Verificar: `engrase.sql` (aislamiento, incompleto sin observación, sin escritura directa, valor por defecto); `plataforma.sql`; revisar `get_advisors`.
+  - 7 tablas con FKs compuestas, CHECK, índices únicos parciales y RLS; sin escritura directa; `neumaticos` sin lectura directa.
+  - `database.types.ts` al día.
+- Verificar: `neumaticos.sql` (dos montajes sobre la misma posición o cubierta fallan por fuera de las funciones; sin escritura directa); `get_advisors`.
 - Depende de: nada.
-- Archivos: `tests/integration/engrase.sql`, `shared/supabase/database.types.ts`.
+- Archivos: `tests/integration/neumaticos.sql`, `shared/supabase/database.types.ts`.
 
-## - [x] T3. Lectura de estados (M)
+## - [x] T3. Stock de cubiertas (L, en dos pasos)
 
-- Aceptación:
-  - `engrase_equipos()` devuelve a los 4 roles los equipos activos con `requiere_engrase` de su empresa (criterios 6 y 10).
-  - El caso de uso calcula estado y restante con el "hoy" de la zona de la empresa.
-- Verificar: base + `engrase.sql`.
+**3a.** `guardar_neumatico` y `neumaticos_listado` (costo oculto al técnico). Verificar: `neumaticos.sql`.
+**3b.** `/neumaticos` con pestañas Montadas / Stock / Recapado y baja, modal "Nueva cubierta", menú activo y ruta protegida. Verificar: base + build.
+
+- Aceptación: cargar sin historial; código repetido y costo negativo rechazados; el técnico no ve costos (criterio 8).
 - Depende de: T1, T2.
-- Archivos: `application/{casos-uso,repositorios}.ts`, `infrastructure/{index,engrase-repositorio}.ts`.
-
-## - [x] T4. Pantalla `/engrase` (M)
-
-- Aceptación:
-  - Conteo, filtro, búsqueda, orden y paginación.
-  - Menú activo para los 4 roles de empresa; ruta protegida.
-- Verificar: base + `npm run build`; en Firefox con planificador y técnico.
-- Depende de: T3.
-- Archivos: `app/(app)/engrase/page.tsx`, `modules/engrase/ui/formato.ts`, `app/(app)/navegacion.ts`, `src/proxy.ts`.
+- Archivos 3b: `modules/neumaticos/{application,infrastructure,ui}`, `app/(app)/neumaticos/{page,actions,modales-neumatico}`, `app/(app)/navegacion.ts`, `proxy.ts`.
 
 ### Punto de control A
 
-- [x] Base y build. Firefox: pendiente de E2E_CLAVE.
+- [ ] Cargar una cubierta y verla en stock. Tu revisión.
 
-## - [x] T5. Plan de engrase (M)
+## - [x] T4. Posiciones y mapa del equipo (M)
 
-- Aceptación:
-  - `guardar_plan_engrase` crea y edita plan y puntos en una transacción.
-  - Modal precargado con las plantillas; exige horas o días.
-  - Técnico y gerente no ven el botón y la base los rechaza.
-- Verificar: base + `engrase.sql`; en Firefox, el equipo pasa a "sin registro".
+- Aceptación: `definir_posiciones` desde plantilla y a mano; no se quita una posición ocupada; mapa por eje; la empresa B no ve nada (criterio 11).
+- Verificar: base + `neumaticos.sql` + build.
+- Depende de: T3.
+- Archivos: `application`, `infrastructure`, `app/(app)/neumaticos/{equipo/[id]/page,actions,modales-posiciones}`.
+
+## - [x] T5. Umbrales y salud (M)
+
+- Aceptación: `guardar_umbrales` solo planificador, por categoría o equipo (criterios 3 y 9); contadores y orden por salud en la lista.
+- Verificar: base + `neumaticos.sql`.
 - Depende de: T4.
-- Archivos: `application/{esquemas,casos-uso,repositorios}.ts`, `infrastructure/engrase-repositorio.ts`, `app/(app)/engrase/{actions.ts,modales-engrase.tsx,page.tsx}`.
+- Archivos: `application`, `infrastructure`, `app/(app)/neumaticos/{page,actions,modales-umbrales}`.
 
-## - [x] T6. Registrar engrase (L, la de más riesgo)
+## - [x] T6. Montar y desmontar (L, la de más riesgo)
 
-Se parte en dos pasos, cada uno verificado.
+**6a. Base:** `montar_neumatico`, `desmontar_neumatico`, `NEUMATICO` en `lecturas_antes_insert`, horas acumuladas, clave. Verificar: `neumaticos.sql`, `engrase.sql`, prueba de caminos del horómetro.
+**6b. App:** modales en el mapa. Verificar: base + build.
 
-**6a. Base**
-
-- Aceptación:
-  - `registrar_engrase`: bloquea el equipo, valida fecha y horómetro, calcula `completo`, copia los puntos, no duplica por clave (criterios 4, 5, 9).
-  - `lecturas_antes_insert` admite `ENGRASE` solo desde la función; el técnico no inserta lecturas directas.
-  - Tras una corrección de horómetro, el equipo no queda bloqueado.
-- Verificar: `engrase.sql`, `equipos.sql`, `trabajos.sql`, `preventivos.sql`, `paradas.sql`.
-- Archivos: `tests/integration/engrase.sql`.
-
-**6b. App**
-
-- Aceptación:
-  - Modal con puntos marcables; observación obligatoria si falta alguno.
-  - Incompleto no cambia el estado; completo lo deja "al día" (criterio 3).
-- Verificar: base + build; recorrido en Firefox como técnico.
-- Archivos: `application/{esquemas,casos-uso,repositorios}.ts`, `infrastructure/engrase-repositorio.ts`, `app/(app)/engrase/{actions.ts,modales-engrase.tsx,page.tsx}`.
-
+- Aceptación: no se monta dos veces ni dos en una posición (criterio 4); reintento sin duplicar (criterio 10).
 - Depende de: T5.
+- Archivos 6b: `application`, `infrastructure`, `app/(app)/neumaticos/{equipo/[id]/page,actions,modales-operacion}`.
 
 ### Punto de control B
 
-- [ ] Plan → incompleto → completo funciona en Firefox y las 5 pruebas SQL pasan. Tu revisión.
+- [ ] Cargar → posiciones → umbrales → montar → desmontar. Tu revisión.
 
-## - [x] T7. Historial por equipo (S)
+## - [x] T7. Medir (M)
 
-- Aceptación:
-  - Registros con puntos, observación y quién registró, para los 4 roles (reusar `nombres_trabajos()` si alcanza).
-  - La lectura `ENGRASE` se ve bien en el historial de horómetro del equipo.
-- Verificar: base + build; Firefox.
+- Aceptación: sesión con tres puntos por cubierta y presión opcional; fuera de rango rechazado; la salud cambia (criterios 1 y 2); aviso de desgaste irregular.
+- Verificar: base + `neumaticos.sql` + build.
 - Depende de: T6.
-- Archivos: `app/(app)/engrase/[id]/page.tsx`, `application/casos-uso.ts`, `infrastructure/engrase-repositorio.ts`.
+- Archivos: `application`, `infrastructure`, `app/(app)/neumaticos/{equipo/[id]/page,actions,modales-medicion}`.
 
-## - [x] T8. Aviso de engrase (M)
+## - [x] T8. Rotar y recapar (M)
 
-- Aceptación:
-  - `configurar_aviso_engrase` solo planificador, solo su empresa, con rangos (criterio 8).
-  - Botón en `/engrase` visible solo para el planificador, con ejemplo y advertencia.
-  - Cambiarlo cambia los estados sin tocar registros (criterio 7).
-- Verificar: base + `engrase.sql`; Firefox como planificador y supervisor.
-- Depende de: T6.
-- Archivos: `application/{esquemas,casos-uso}.ts`, `infrastructure/engrase-repositorio.ts`, `app/(app)/engrase/{actions.ts,modales-engrase.tsx,page.tsx}`.
+- Aceptación: rotar intercambia o mueve (criterio 5); recapar suma recapado y costo y vuelve a stock (criterio 7).
+- Verificar: base + `neumaticos.sql`.
+- Depende de: T7.
+- Archivos: `application`, `infrastructure`, `app/(app)/neumaticos/{actions,modales-operacion}` y las dos páginas.
 
-## - [ ] T9. Cierre del corte (S)
+## - [x] T9. Detalle de la cubierta (S)
 
-- Aceptación:
-  - E2E del recorrido de la spec en Firefox.
-  - Los 11 criterios revisados uno por uno.
-  - `SPEC.md` al día con lo construido.
-- Verificar: base + `npm run build` + `E2E_CLAVE=... npm run test:e2e -- tests/e2e/engrase.spec.ts`.
-- Depende de: T7, T8.
-- Archivos: `tests/e2e/engrase.spec.ts`, `SPEC.md`.
+- Aceptación: historial, mediciones, costo por hora o km (criterio 6); proyección solo con plan Pro; el técnico sin costos.
+- Verificar: base + build.
+- Depende de: T8.
+- Archivos: `app/(app)/neumaticos/[id]/page.tsx`, `application`, `infrastructure`.
+
+## - [ ] T10. Cierre (S)
+
+- Aceptación: E2E en Firefox; los 12 criterios revisados; spec al día.
+- Verificar: base + build + `E2E_CLAVE=... npm run test:e2e -- tests/e2e/neumaticos.spec.ts`.
+- Depende de: T9.
+- Archivos: `tests/e2e/neumaticos.spec.ts`, `SPEC-corte9-neumaticos.md`.
 
 ### Punto de control C
 

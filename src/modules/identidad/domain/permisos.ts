@@ -39,7 +39,11 @@ export type Recurso =
   | "reportes"
   // Plan y registros de engrase. El aviso de la empresa va aparte: solo el planificador.
   | "engrase"
-  | "aviso_engrase";
+  | "aviso_engrase"
+  // Neumáticos: "crear" = operar (montar, rotar, desmontar, medir); "editar" = cargar, posiciones, recapar.
+  | "neumaticos"
+  | "costos_neumaticos"
+  | "umbrales_neumaticos";
 
 const TODO: Accion[] = ["leer", "crear", "editar", "dar_baja"];
 const ESCRIBIR: Accion[] = ["leer", "crear", "editar"];
@@ -60,6 +64,9 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     reportes: LEER,
     engrase: ESCRIBIR,
     aviso_engrase: ["leer", "editar"],
+    neumaticos: ESCRIBIR,
+    costos_neumaticos: LEER,
+    umbrales_neumaticos: ["leer", "editar"],
   },
   SUPERVISOR: {
     personas: LEER,
@@ -72,6 +79,8 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     informes_sin_validar: LEER,
     reportes: LEER,
     engrase: ESCRIBIR,
+    neumaticos: ESCRIBIR,
+    costos_neumaticos: LEER,
   },
   // El técnico no ve el estado de la flota ni informes sin validar.
   // Registra engrases ("crear"), pero no edita planes.
@@ -80,6 +89,8 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     trabajos: ESCRIBIR,
     informes_validados: LEER,
     engrase: ["leer", "crear"],
+    // Opera y mide, pero no carga cubiertas ni ve costos.
+    neumaticos: ["leer", "crear"],
   },
   // El gerente solo lee.
   GERENTE: {
@@ -93,6 +104,8 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     informes_sin_validar: LEER,
     reportes: LEER,
     engrase: LEER,
+    neumaticos: LEER,
+    costos_neumaticos: LEER,
   },
 };
 
