@@ -7,6 +7,7 @@ const ESTADO: Record<string, number> = {
   FORBIDDEN: 403,
   VALIDATION: 400,
   NOT_FOUND: 404,
+  RATE_LIMITED: 429,
 };
 
 // Respuesta de descarga: sin caché (datos de la empresa) y sin que el navegador adivine el tipo.

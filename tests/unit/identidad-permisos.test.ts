@@ -26,12 +26,18 @@ const RECURSOS: Recurso[] = [
   "neumaticos",
   "costos_neumaticos",
   "umbrales_neumaticos",
+  "respaldo_empresa",
 ];
 
 // Matriz esperada escrita a mano: si alguien cambia permisos.ts, esta prueba lo obliga a decidirlo aquí.
 // L = leer, C = crear, E = editar, B = dar de baja.
 const ESPERADO: Record<Rol, Partial<Record<Recurso, string>>> = {
-  SUPERADMIN: { plataforma: "LCEB", personas: "LCEB", cuentas: "LCEB" },
+  SUPERADMIN: {
+    plataforma: "LCEB",
+    personas: "LCEB",
+    cuentas: "LCEB",
+    respaldo_empresa: "L",
+  },
   PLANIFICADOR: {
     personas: "LCEB",
     cuentas: "LCEB",
@@ -47,6 +53,7 @@ const ESPERADO: Record<Rol, Partial<Record<Recurso, string>>> = {
     neumaticos: "LCE",
     costos_neumaticos: "L",
     umbrales_neumaticos: "LE",
+    respaldo_empresa: "L",
   },
   SUPERVISOR: {
     personas: "L",
@@ -132,8 +139,9 @@ describe("roles que puede gestionar", () => {
       "GERENTE",
     ]);
   });
-  it("planificador crea supervisor, técnico y gerente, no planificadores", () => {
+  it("planificador gestiona todos los roles de empresa, incluido otro planificador", () => {
     expect(rolesQuePuedeGestionar("PLANIFICADOR")).toEqual([
+      "PLANIFICADOR",
       "SUPERVISOR",
       "TECNICO",
       "GERENTE",

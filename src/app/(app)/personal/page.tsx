@@ -15,12 +15,14 @@ import { boton, tarjeta } from "@/shared/ui/estilos";
 import { Paginacion, paginar, type ParamsUrl } from "@/shared/ui/paginacion";
 import { formatoFechaHora } from "@/shared/ui/formato";
 import { IconoPersonas } from "@/shared/ui/iconos";
+import { AccionesCuenta } from "@/modules/identidad/ui/acciones-cuenta";
 import { ModalCuenta } from "@/modules/identidad/ui/modal-cuenta";
 import { Encabezado, Esqueleto } from "../encabezado";
 import {
   asignarPersonaAction,
   crearCuentaAction,
   darBajaAction,
+  desactivarCuentaAction,
   reactivarAction,
 } from "./actions";
 import { ModalEditarPersona, ModalRolCuenta } from "./modales-edicion";
@@ -70,7 +72,7 @@ async function Contenido({
   );
   const rolPorCuenta = new Map(cuentas.map((c) => [c.id, c.rol]));
   const conCupo = hayCupo(cupo);
-  const libres = cuentas.filter((c) => !c.persona).length;
+  const libres = cuentas.filter((c) => c.activa && !c.persona).length;
   const pct = cupo.maximo
     ? Math.min(100, (cupo.usados / cupo.maximo) * 100)
     : 0;
@@ -244,7 +246,13 @@ async function Contenido({
                 {pagCuentas.items.map((c) => (
                   <tr
                     key={c.id}
-                    className={`transition-colors hover:bg-surface-2/50 ${c.persona ? "" : "bg-warn-soft/35"}`}
+                    className={`transition-colors hover:bg-surface-2/50 ${
+                      !c.activa
+                        ? "text-muted"
+                        : c.persona
+                          ? ""
+                          : "bg-warn-soft/35"
+                    }`}
                   >
                     <td className="px-5 py-3 font-medium">
                       {c.correo}
@@ -258,7 +266,11 @@ async function Contenido({
                       {etiquetaRol(c.rol)}
                     </td>
                     <td className="px-5 py-3">
-                      {c.persona ? (
+                      {!c.activa ? (
+                        <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-muted">
+                          Inactiva
+                        </span>
+                      ) : c.persona ? (
                         c.persona.nombre
                       ) : (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-warn-soft px-2.5 py-0.5 text-xs font-semibold text-warn">
@@ -276,29 +288,29 @@ async function Contenido({
                       {gestiona &&
                         c.id !== actor.id &&
                         rolesGestionables.includes(c.rol) && (
-                          <ModalRolCuenta
-                            cuentaId={c.id}
-                            correo={c.correo}
-                            rol={c.rol}
-                            roles={rolesGestionables.map((valor) => ({
-                              valor,
-                              etiqueta: etiquetaRol(valor),
-                            }))}
-                          />
-                        )}
-                      {gestiona &&
-                        !c.persona &&
-                        rolesGestionables.includes(c.rol) && (
-                          <ModalCuenta
-                            estilo="enlace"
-                            textoDisparador="Asignar personal"
-                            titulo="Asignar cuenta"
-                            descripcion={`Cuenta de ${etiquetaRol(c.rol)}, antes ${c.correo}. Recibe correo y contraseña nuevos; los anteriores dejan de servir.`}
-                            accion={asignarPersonaAction}
-                            modo={{ tipo: "asignar", cuentaId: c.id }}
-                            personasLibres={personasLibres}
-                            textoBoton="Asignar y generar contraseña"
-                          />
+                          <>
+                            {c.activa && (
+                              <ModalRolCuenta
+                                cuentaId={c.id}
+                                correo={c.correo}
+                                rol={c.rol}
+                                roles={rolesGestionables.map((valor) => ({
+                                  valor,
+                                  etiqueta: etiquetaRol(valor),
+                                }))}
+                              />
+                            )}
+                            <AccionesCuenta
+                              cuenta={c}
+                              etiquetaRol={etiquetaRol(c.rol)}
+                              personasLibres={personasLibres}
+                              conCupo={conCupo}
+                              acciones={{
+                                asignar: asignarPersonaAction,
+                                desactivar: desactivarCuentaAction,
+                              }}
+                            />
+                          </>
                         )}
                     </td>
                   </tr>

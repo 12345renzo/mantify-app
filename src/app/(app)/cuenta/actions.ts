@@ -18,7 +18,6 @@ export async function cambiarClaveAction(
   fd: FormData,
 ): Promise<EstadoClave> {
   const datos = cambiarClaveSchema.safeParse({
-    actual: fd.get("actual") ?? "",
     nueva: fd.get("nueva") ?? "",
     repetir: fd.get("repetir") ?? "",
   });
@@ -40,9 +39,7 @@ export async function cambiarClaveAction(
     return {
       error: mensajeError(r.error, {
         VALIDATION:
-          r.error.message === "clave débil"
-            ? "Esa contraseña es muy débil. Usa una más larga o menos común."
-            : "La contraseña actual no es correcta.",
+          "Esa contraseña es muy débil. Usa una más larga o menos común.",
       }),
     };
   }

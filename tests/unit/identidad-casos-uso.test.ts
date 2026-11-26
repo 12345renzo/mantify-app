@@ -3,6 +3,7 @@ import { cambiarClave } from "@/modules/identidad/application/cambiar-clave";
 import { cambiarRolCuenta } from "@/modules/identidad/application/cambiar-rol-cuenta";
 import { crearUsuario } from "@/modules/identidad/application/crear-usuario";
 import { darDeBajaPersona } from "@/modules/identidad/application/dar-de-baja-persona";
+import { desactivarCuenta } from "@/modules/identidad/application/desactivar-cuenta";
 import { editarPersona } from "@/modules/identidad/application/editar-persona";
 import type { PersonaEntrada } from "@/modules/identidad/application/esquemas";
 import { reactivarPersona } from "@/modules/identidad/application/reactivar-persona";
@@ -90,6 +91,7 @@ function fakes(
         rol: "TECNICO",
         personaId: null,
         correo: "viejo@a.pe",
+        activa: true,
       },
     ],
     [
@@ -100,6 +102,7 @@ function fakes(
         rol: "TECNICO",
         personaId: "p-con-cuenta",
         correo: "t@a.pe",
+        activa: true,
       },
     ],
     [
@@ -110,6 +113,7 @@ function fakes(
         rol: "PLANIFICADOR",
         personaId: null,
         correo: "pl@a.pe",
+        activa: true,
       },
     ],
     [
@@ -120,6 +124,29 @@ function fakes(
         rol: "PLANIFICADOR",
         personaId: "p-planif",
         correo: "yo@a.pe",
+        activa: true,
+      },
+    ],
+    [
+      "c-inactiva",
+      {
+        id: "c-inactiva",
+        empresaId: A,
+        rol: "SUPERVISOR",
+        personaId: null,
+        correo: "sup.vieja@a.pe",
+        activa: false,
+      },
+    ],
+    [
+      "c-plan2",
+      {
+        id: "c-plan2",
+        empresaId: A,
+        rol: "PLANIFICADOR",
+        personaId: "p-otro-planif",
+        correo: "plan2@a.pe",
+        activa: true,
       },
     ],
     [
@@ -130,6 +157,7 @@ function fakes(
         rol: "TECNICO",
         personaId: null,
         correo: "b@b.pe",
+        activa: true,
       },
     ],
   ]);
@@ -169,6 +197,7 @@ function fakes(
       log.push(`asignar:${id}:${personaId}:${correo}`),
       ok(undefined)
     ),
+    desactivar: async (id) => (log.push(`desactivar:${id}`), ok(undefined)),
     marcarClaveCambiada: async () => (log.push("clave-marcada"), ok(undefined)),
   };
   const auth: ServicioAuth = {
@@ -181,7 +210,7 @@ function fakes(
       log.push(`auth-cambio:${id}:${correo}`),
       ok({ clave: "Otra-Clave-14x" })
     ),
-    verificarClave: async (_c, clave) => clave === "actual-correcta",
+    verificarClave: async () => true,
     cambiarMiClave: async () => (log.push("clave-cambiada"), ok(undefined)),
   };
   return { personas: repoPersonas, cuentas: repoCuentas, auth, log };
@@ -211,15 +240,15 @@ describe("crearUsuario", () => {
     ]);
   });
 
-  it("el planificador no puede crear otro planificador", async () => {
+  it("el planificador también crea otro planificador", async () => {
     const f = fakes();
     const r = await crearUsuario(
       planificador,
       { ...entradaCuenta, rol: "PLANIFICADOR" },
       f,
     );
-    expect(!r.ok && r.error.code).toBe("FORBIDDEN");
-    expect(f.log).toEqual([]);
+    expect(r.ok).toBe(true);
+    expect(f.log).toContain(`cuenta:PLANIFICADOR:p-nueva:${A}`);
   });
 
   it("la empresa que manda el cliente se ignora: el planificador crea en la suya", async () => {
@@ -309,18 +338,13 @@ describe("darDeBajaPersona", () => {
     );
     expect(!r.ok && r.error.code).toBe("FORBIDDEN");
   });
-  it("no puede dar de baja a otro planificador; el superadmin sí", async () => {
+  it("da de baja a otro planificador (no a sí mismo)", async () => {
     const f = fakes();
-    const r = await darDeBajaPersona(
-      planificador,
-      { personaId: "p-otro-planif" },
-      f,
-    );
-    expect(!r.ok && r.error.code).toBe("FORBIDDEN");
     expect(
-      (await darDeBajaPersona(superadmin, { personaId: "p-otro-planif" }, f))
+      (await darDeBajaPersona(planificador, { personaId: "p-otro-planif" }, f))
         .ok,
     ).toBe(true);
+    expect(f.log).toEqual(["baja:p-otro-planif"]);
   });
   it("persona de otra empresa: NOT_FOUND", async () => {
     const f = fakes();
@@ -374,13 +398,12 @@ describe("editarPersona", () => {
     }
     expect(f.log).toEqual(["editar:p-libre", "editar:p-planif"]);
   });
-  it("otro planificador: FORBIDDEN; otra empresa: NOT_FOUND; gerente: FORBIDDEN", async () => {
+  it("otra empresa: NOT_FOUND; gerente: FORBIDDEN", async () => {
     const f = fakes();
     const codigo = async (a: Actor, personaId: string) => {
       const r = await editarPersona(a, { personaId, persona: nueva }, f);
       return !r.ok && r.error.code;
     };
-    expect(await codigo(planificador, "p-otro-planif")).toBe("FORBIDDEN");
     expect(await codigo(planificador, "p-de-b")).toBe("NOT_FOUND");
     expect(await codigo(actor("GERENTE"), "p-libre")).toBe("FORBIDDEN");
     expect(f.log).toEqual([]);
@@ -398,7 +421,7 @@ describe("cambiarRolCuenta", () => {
     expect(r.ok).toBe(true);
     expect(f.log).toEqual(["rol:c-libre:SUPERVISOR"]);
   });
-  it("rechaza: propio, a planificador, de planificador, mismo rol, otra empresa", async () => {
+  it("cambia de y a planificador; rechaza propio, mismo rol y otra empresa", async () => {
     const f = fakes();
     const codigo = async (
       cuentaId: string,
@@ -408,11 +431,14 @@ describe("cambiarRolCuenta", () => {
       return !r.ok && r.error.code;
     };
     expect(await codigo("u-PLANIFICADOR", "GERENTE")).toBe("FORBIDDEN");
-    expect(await codigo("c-libre", "PLANIFICADOR")).toBe("FORBIDDEN");
-    expect(await codigo("c-plan-libre", "GERENTE")).toBe("FORBIDDEN");
     expect(await codigo("c-libre", "TECNICO")).toBe("CONFLICT");
     expect(await codigo("c-de-b", "GERENTE")).toBe("NOT_FOUND");
-    expect(f.log).toEqual([]);
+    expect(await codigo("c-libre", "PLANIFICADOR")).toBe(false);
+    expect(await codigo("c-plan-libre", "GERENTE")).toBe(false);
+    expect(f.log).toEqual([
+      "rol:c-libre:PLANIFICADOR",
+      "rol:c-plan-libre:GERENTE",
+    ]);
   });
 });
 
@@ -441,7 +467,6 @@ describe("reemplazarPersona", () => {
   it.each([
     ["cuenta ocupada", "c-ocupada", "CONFLICT"],
     ["cuenta de otra empresa", "c-de-b", "NOT_FOUND"],
-    ["cuenta de planificador", "c-plan-libre", "FORBIDDEN"],
   ])("rechaza %s", async (_n, cuentaId, code) => {
     const f = fakes();
     const r = await reemplazarPersona(planificador, { ...base, cuentaId }, f);
@@ -450,25 +475,87 @@ describe("reemplazarPersona", () => {
   });
 });
 
+describe("reemplazarPersona en cuenta inactiva (reactivar)", () => {
+  const base = {
+    correo: "sup.vieja@a.pe",
+    personaId: "p-libre",
+    personaNueva: null,
+  };
+  it("con cupo: credenciales nuevas y asigna (la base la deja activa)", async () => {
+    const f = fakes();
+    const r = await reemplazarPersona(
+      planificador,
+      { ...base, cuentaId: "c-inactiva" },
+      f,
+    );
+    expect(r.ok && r.value.clave).toBe("Otra-Clave-14x");
+    expect(f.log).toEqual([
+      "auth-cambio:c-inactiva:sup.vieja@a.pe",
+      "asignar:c-inactiva:p-libre:sup.vieja@a.pe",
+    ]);
+  });
+  it("sin cupo: LIMIT y no toca credenciales", async () => {
+    const f = fakes({ usados: 10, maximo: 10 });
+    const r = await reemplazarPersona(
+      planificador,
+      { ...base, cuentaId: "c-inactiva" },
+      f,
+    );
+    expect(!r.ok && r.error.code).toBe("LIMIT");
+    expect(f.log).toEqual([]);
+  });
+  it("cuenta activa sin persona con cupo lleno: sí asigna (ya ocupa su lugar)", async () => {
+    const f = fakes({ usados: 10, maximo: 10 });
+    const r = await reemplazarPersona(
+      planificador,
+      { ...base, cuentaId: "c-libre" },
+      f,
+    );
+    expect(r.ok).toBe(true);
+  });
+});
+
+describe("desactivarCuenta", () => {
+  it("planificador desactiva una cuenta de su equipo, también otro planificador", async () => {
+    const f = fakes();
+    for (const cuentaId of ["c-ocupada", "c-plan2"]) {
+      expect((await desactivarCuenta(planificador, { cuentaId }, f)).ok).toBe(
+        true,
+      );
+    }
+    expect(f.log).toEqual(["desactivar:c-ocupada", "desactivar:c-plan2"]);
+  });
+  it("superadmin desactiva cuentas de cualquier empresa", async () => {
+    const f = fakes();
+    expect(
+      (await desactivarCuenta(superadmin, { cuentaId: "c-de-b" }, f)).ok,
+    ).toBe(true);
+    expect(f.log).toEqual(["desactivar:c-de-b"]);
+  });
+  it.each([
+    ["la propia", planificador, "u-PLANIFICADOR", "FORBIDDEN"],
+    ["ya inactiva", planificador, "c-inactiva", "CONFLICT"],
+    ["de otra empresa", planificador, "c-de-b", "NOT_FOUND"],
+    ["siendo gerente", actor("GERENTE"), "c-ocupada", "FORBIDDEN"],
+    ["siendo supervisor", actor("SUPERVISOR"), "c-ocupada", "FORBIDDEN"],
+    ["sin sesión", null, "c-ocupada", "UNAUTHENTICATED"],
+  ])("rechaza %s", async (_n, quien, cuentaId, code) => {
+    const f = fakes();
+    const r = await desactivarCuenta(quien, { cuentaId }, f);
+    expect(!r.ok && r.error.code).toBe(code);
+    expect(f.log).toEqual([]);
+  });
+});
+
 describe("cambiarClave", () => {
-  it("con la clave actual correcta, cambia y quita el aviso", async () => {
+  it("cambia y quita el aviso", async () => {
     const f = fakes();
     const r = await cambiarClave(
       planificador,
-      { actual: "actual-correcta", nueva: "una-clave-nueva-larga" },
+      { nueva: "una-clave-nueva-larga" },
       f,
     );
     expect(r.ok).toBe(true);
     expect(f.log).toEqual(["clave-cambiada", "clave-marcada"]);
-  });
-  it("con la clave actual incorrecta, no cambia nada", async () => {
-    const f = fakes();
-    const r = await cambiarClave(
-      planificador,
-      { actual: "otra", nueva: "una-clave-nueva-larga" },
-      f,
-    );
-    expect(!r.ok && r.error.code).toBe("VALIDATION");
-    expect(f.log).toEqual([]);
   });
 });

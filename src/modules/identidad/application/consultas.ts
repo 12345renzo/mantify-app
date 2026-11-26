@@ -22,6 +22,7 @@ export type CuentaFila = {
   correo: string;
   rol: string;
   persona: { id: string; nombre: string } | null;
+  activa: boolean;
   debeCambiarClave: boolean;
   ultimoAcceso: string | null;
 };

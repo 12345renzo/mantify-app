@@ -50,7 +50,14 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Dashboard y exportaciones con datos de la empresa: nunca en caché (corte 10).
+      {
+        source: "/:ruta(inicio|reportes)",
+        headers: [{ key: "Cache-Control", value: "private, no-store" }],
+      },
+    ];
   },
   // La primera vista es el login.
   async redirects() {

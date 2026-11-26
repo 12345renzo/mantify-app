@@ -16,6 +16,7 @@ const CODIGOS: Record<string, DomainErrorCode> = {
   MT003: "EN_USO", // catálogo usado por equipos activos
   MT004: "CONFLICT", // el trabajo cambió de estado (otra persona actuó antes)
   MT005: "VALIDATION", // la parada se cruza con otra del mismo equipo (se confirma y se reintenta)
+  MT006: "SIN_PLANIFICADOR", // quitaría al último planificador activo (trigger usuarios_ultimo_planificador)
   PGRST116: "NOT_FOUND",
 };
 

@@ -10,6 +10,7 @@ const BASE: Record<DomainErrorCode, string> = {
   RATE_LIMITED: "Demasiados intentos. Espera un momento.",
   LIMIT: "Llegaste al límite de cuentas de tu plan.",
   EN_USO: "Está en uso por registros activos.",
+  SIN_PLANIFICADOR: "La empresa no puede quedarse sin un planificador activo.",
 };
 
 export function mensajeError(

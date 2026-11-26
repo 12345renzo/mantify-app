@@ -11,6 +11,14 @@ import {
   puede,
 } from "@/modules/identidad/domain/permisos";
 import { reposIdentidad } from "@/modules/identidad/infrastructure";
+import { obtenerDashboard } from "@/modules/reportes/application/obtener-dashboard";
+import { reposReportes } from "@/modules/reportes/infrastructure";
+import {
+  BloqueFlota,
+  DashboardGestion,
+  DashboardTecnico,
+} from "@/modules/reportes/ui/dashboard";
+import type { Actor } from "@/shared/kernel/actor";
 import { tarjeta } from "@/shared/ui/estilos";
 import { IconoFlecha, IconoPanel, IconoPersonas } from "@/shared/ui/iconos";
 import { redirect } from "next/navigation";
@@ -44,6 +52,10 @@ async function Contenido() {
         }
         descripcion={[rol, perfil.empresa].filter(Boolean).join(" · ")}
       />
+
+      <Suspense fallback={<Esqueleto alto="h-96" />}>
+        <Panel actor={actor} />
+      </Suspense>
 
       {puede(actor.rol, "leer", "cuentas") && (
         <Link
@@ -81,5 +93,41 @@ async function Contenido() {
 
       <Modulos rol={actor.rol} />
     </>
+  );
+}
+
+// Dashboard y bandeja según el rol (corte 10). Cada número sale de la misma regla que su módulo.
+async function Panel({ actor }: { actor: Actor }) {
+  const r = await obtenerDashboard(actor, await reposReportes(actor));
+  if (!r.ok) throw r.error;
+  const d = r.value;
+  return (
+    <div className="mb-6">
+      {d.tipo === "GESTION" && <DashboardGestion d={d} />}
+      {d.tipo === "GERENTE" && <BloqueFlota flota={d.flota} />}
+      {d.tipo === "TECNICO" && (
+        <DashboardTecnico
+          d={d}
+          accesos={[
+            { href: "/trabajos", texto: "Mis trabajos", ok: true },
+            {
+              href: "/paradas",
+              texto: "Iniciar parada",
+              ok: puede(actor.rol, "crear", "trabajos"),
+            },
+            {
+              href: "/engrase",
+              texto: "Registrar engrase",
+              ok: puede(actor.rol, "crear", "engrase"),
+            },
+            {
+              href: "/neumaticos",
+              texto: "Medir neumáticos",
+              ok: puede(actor.rol, "crear", "neumaticos"),
+            },
+          ].filter((a) => a.ok)}
+        />
+      )}
+    </div>
   );
 }

@@ -2604,6 +2604,7 @@ export type Database = {
           creado_por: string | null;
           debe_cambiar_clave: boolean;
           empresa_id: string | null;
+          estado: string;
           id: string;
           persona_id: string | null;
           rol: string;
@@ -2616,6 +2617,7 @@ export type Database = {
           creado_por?: string | null;
           debe_cambiar_clave?: boolean;
           empresa_id?: string | null;
+          estado?: string;
           id: string;
           persona_id?: string | null;
           rol: string;
@@ -2628,6 +2630,7 @@ export type Database = {
           creado_por?: string | null;
           debe_cambiar_clave?: boolean;
           empresa_id?: string | null;
+          estado?: string;
           id?: string;
           persona_id?: string | null;
           rol?: string;
@@ -3209,6 +3212,10 @@ export type Database = {
           version: number;
         }[];
       };
+      exportar_empresa: {
+        Args: { p_completo: boolean; p_empresa: string };
+        Returns: Json;
+      };
       ejecutar_preventivo: {
         Args: {
           p_clave: string;
@@ -3411,6 +3418,11 @@ export type Database = {
         Returns: string;
       };
       cupo_cuentas: { Args: { p_empresa_id: string }; Returns: number };
+      dashboard_datos: {
+        Args: { p_desde: string; p_hasta: string };
+        Returns: Json;
+      };
+      desactivar_cuenta: { Args: { p_usuario_id: string }; Returns: undefined };
       dar_de_baja_empresa: {
         Args: { p_empresa_id: string; p_motivo: string };
         Returns: undefined;

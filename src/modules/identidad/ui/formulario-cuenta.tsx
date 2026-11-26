@@ -25,7 +25,8 @@ type Props = {
         roles: { valor: string; etiqueta: string }[];
         empresaId?: string;
       }
-    | { tipo: "asignar"; cuentaId: string };
+    // correo: el que tenía la cuenta, ya escrito para conservarlo o cambiarlo.
+    | { tipo: "asignar"; cuentaId: string; correo?: string };
   personasLibres: { id: string; nombre: string }[];
   textoBoton: string;
   // Se llama con "Listo", después de ver las credenciales.
@@ -105,7 +106,9 @@ export function FormularioCuenta({
             type="email"
             autoComplete="off"
             maxLength={160}
-            defaultValue={v.correo}
+            defaultValue={
+              v.correo ?? (modo.tipo === "asignar" ? modo.correo : undefined)
+            }
             placeholder="nombre@empresa.pe"
             className={campo}
             aria-invalid={e.correo ? true : undefined}

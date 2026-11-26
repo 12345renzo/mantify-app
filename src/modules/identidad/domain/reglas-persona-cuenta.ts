@@ -1,9 +1,15 @@
 // Una cuenta es un acceso de la empresa. Funciona solo con una persona activa asignada
 // y con la empresa al día; si no, existe pero no entra.
 export type MotivoSinAcceso =
-  "SIN_PERSONA" | "PERSONA_BAJA" | "EMPRESA_INACTIVA" | "SESION_REVOCADA";
+  | "CUENTA_INACTIVA"
+  | "SIN_PERSONA"
+  | "PERSONA_BAJA"
+  | "EMPRESA_INACTIVA"
+  | "SESION_REVOCADA";
 
 export const MENSAJE_SIN_ACCESO: Record<MotivoSinAcceso, string> = {
+  CUENTA_INACTIVA:
+    "Tu cuenta fue desactivada. Habla con el planificador de tu empresa.",
   SIN_PERSONA:
     "Tu cuenta no está asignada a ninguna persona. Habla con el planificador de tu empresa.",
   PERSONA_BAJA:

@@ -8,7 +8,6 @@ import { Modal } from "@/shared/ui/modal";
 import { cambiarClaveAction, type EstadoClave } from "./actions";
 
 const CAMPOS = [
-  { id: "actual", label: "Contraseña actual", auto: "current-password" },
   {
     id: "nueva",
     label: "Nueva contraseña",

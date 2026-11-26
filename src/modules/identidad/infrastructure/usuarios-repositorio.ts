@@ -14,7 +14,8 @@ export function crearCuentasRepositorio(
         db
           .from("usuarios")
           .select("id", { count: "exact", head: true })
-          .eq("empresa_id", empresaId),
+          .eq("empresa_id", empresaId)
+          .eq("estado", "ACTIVA"),
         db.rpc("cupo_cuentas", { p_empresa_id: empresaId }),
       ]);
       if (usados.error) throw aDomainError(usados.error);
@@ -39,7 +40,7 @@ export function crearCuentasRepositorio(
     async obtener(id) {
       const { data, error } = await db
         .from("usuarios")
-        .select("id, empresa_id, rol, persona_id, correo")
+        .select("id, empresa_id, rol, persona_id, correo, estado")
         .eq("id", id)
         .maybeSingle();
       if (error) return err(aDomainError(error));
@@ -50,6 +51,7 @@ export function crearCuentasRepositorio(
         rol: data.rol,
         personaId: data.persona_id,
         correo: data.correo,
+        activa: data.estado === "ACTIVA",
       });
     },
 
@@ -76,6 +78,14 @@ export function crearCuentasRepositorio(
           new DomainError("FORBIDDEN", "no puede cambiar esta cuenta"),
         );
       }
+      return ok(undefined);
+    },
+
+    async desactivar(id) {
+      const { error } = await db.rpc("desactivar_cuenta", {
+        p_usuario_id: id,
+      });
+      if (error) return err(aDomainError(error));
       return ok(undefined);
     },
 

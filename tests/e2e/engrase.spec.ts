@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { claveDe } from "./claves";
 
 // Flujo del corte 8 en la empresa de prueba (E2E_PLAN, E2E_SUP, E2E_TEC con E2E_CLAVE):
 // planificador crea el plan → técnico registra un engrase incompleto (no queda al día) y uno completo
@@ -6,17 +7,16 @@ import { expect, test, type Page } from "@playwright/test";
 const PLAN = process.env.E2E_PLAN ?? "e2e.plan@prueba.pe";
 const SUP = process.env.E2E_SUP ?? "e2e.sup@prueba.pe";
 const TEC = process.env.E2E_TEC ?? "e2e.tec@prueba.pe";
-const CLAVE = process.env.E2E_CLAVE ?? "";
 const EQUIPO = process.env.E2E_EQUIPO_ENGRASE ?? "E2E01";
 const GRASA = "EP2 E2E";
 
-test.skip(!CLAVE, "Falta E2E_CLAVE");
+test.skip(!claveDe(TEC), "Faltan las claves E2E_CLAVE_*");
 
 async function entrar(page: Page, correo: string) {
   await page.context().clearCookies();
   await page.goto("/login");
   await page.getByLabel("Correo").fill(correo);
-  await page.getByLabel("Contraseña", { exact: true }).fill(CLAVE);
+  await page.getByLabel("Contraseña", { exact: true }).fill(claveDe(correo));
   await page.getByRole("button", { name: "Ingresar" }).click();
   await page.waitForURL("**/inicio");
   await page.waitForLoadState("networkidle");

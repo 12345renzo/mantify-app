@@ -21,8 +21,9 @@ import {
   ESTADOS_REQUISICION,
   EVENTOS_HISTORIAL,
 } from "@/modules/trabajos/ui/formato";
+import { puede } from "@/modules/identidad/domain/permisos";
 import { hoyEn } from "@/shared/kernel/fechas";
-import { cabeceraSeccion, tarjeta } from "@/shared/ui/estilos";
+import { boton, cabeceraSeccion, tarjeta } from "@/shared/ui/estilos";
 import { formatoFecha, formatoFechaHora } from "@/shared/ui/formato";
 import { IconoAtras, IconoLlave } from "@/shared/ui/iconos";
 import { Encabezado, Esqueleto } from "../../encabezado";
@@ -130,6 +131,15 @@ async function Detalle({ params }: { params: Promise<{ id: string }> }) {
             )}
             {eventos.includes("APROBAR") && (
               <ModalValidar backlogId={b.id} tieneFirma={tieneFirma} />
+            )}
+            {b.ot && puede(actor.rol, "leer", "reportes") && (
+              <a
+                href={`/api/reportes/ot?id=${b.id}`}
+                className={boton.secundario}
+                download
+              >
+                PDF de la OT
+              </a>
             )}
           </>
         }

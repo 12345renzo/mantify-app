@@ -26,7 +26,7 @@ export function crearLectorIdentidad(db: SupabaseServidor): LectorIdentidad {
         db
           .from("usuarios")
           .select(
-            "id, correo, rol, persona_id, debe_cambiar_clave, ultimo_acceso_en",
+            "id, correo, rol, persona_id, estado, debe_cambiar_clave, ultimo_acceso_en",
           )
           .eq("empresa_id", empresaId)
           .order("rol")
@@ -34,7 +34,8 @@ export function crearLectorIdentidad(db: SupabaseServidor): LectorIdentidad {
         db
           .from("usuarios")
           .select("id", { count: "exact", head: true })
-          .eq("empresa_id", empresaId),
+          .eq("empresa_id", empresaId)
+          .eq("estado", "ACTIVA"),
         db.rpc("cupo_cuentas", { p_empresa_id: empresaId }),
       ]);
       for (const r of [empresa, personas, cuentas, usados, tope]) {
@@ -77,6 +78,7 @@ export function crearLectorIdentidad(db: SupabaseServidor): LectorIdentidad {
           persona: c.persona_id
             ? { id: c.persona_id, nombre: nombrePorId.get(c.persona_id) ?? "—" }
             : null,
+          activa: c.estado === "ACTIVA",
           debeCambiarClave: c.debe_cambiar_clave,
           ultimoAcceso: c.ultimo_acceso_en,
         })),

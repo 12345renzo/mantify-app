@@ -43,7 +43,9 @@ export type Recurso =
   // Neumáticos: "crear" = operar (montar, rotar, desmontar, medir); "editar" = cargar, posiciones, recapar.
   | "neumaticos"
   | "costos_neumaticos"
-  | "umbrales_neumaticos";
+  | "umbrales_neumaticos"
+  // Exportar es leer "reportes". El JSON completo de la empresa va aparte: planificador y superadmin.
+  | "respaldo_empresa";
 
 const TODO: Accion[] = ["leer", "crear", "editar", "dar_baja"];
 const ESCRIBIR: Accion[] = ["leer", "crear", "editar"];
@@ -51,7 +53,12 @@ const LEER: Accion[] = ["leer"];
 
 // Denegar por defecto: lo que no está aquí, no se puede. RLS repite estas reglas en la base.
 const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
-  SUPERADMIN: { plataforma: TODO, personas: TODO, cuentas: TODO },
+  SUPERADMIN: {
+    plataforma: TODO,
+    personas: TODO,
+    cuentas: TODO,
+    respaldo_empresa: LEER,
+  },
   PLANIFICADOR: {
     personas: TODO,
     cuentas: TODO,
@@ -67,6 +74,7 @@ const MATRIZ: Record<Rol, Partial<Record<Recurso, Accion[]>>> = {
     neumaticos: ESCRIBIR,
     costos_neumaticos: LEER,
     umbrales_neumaticos: ["leer", "editar"],
+    respaldo_empresa: LEER,
   },
   SUPERVISOR: {
     personas: LEER,
@@ -122,12 +130,12 @@ export function puede(
   return MATRIZ[rol][recurso]?.includes(accion) ?? false;
 }
 
-// Qué cuentas puede crear o reasignar cada rol. El superadmin crea al planificador de cada empresa.
+// Qué cuentas puede crear o gestionar cada rol, siempre menos la propia (lo revisa cada caso de uso).
 export function rolesQuePuedeGestionar(
   rol: string | null,
 ): readonly RolEmpresa[] {
   if (rol === "SUPERADMIN") return ROLES_EMPRESA;
-  if (rol === "PLANIFICADOR") return ["SUPERVISOR", "TECNICO", "GERENTE"];
+  if (rol === "PLANIFICADOR") return ROLES_EMPRESA;
   return [];
 }
 

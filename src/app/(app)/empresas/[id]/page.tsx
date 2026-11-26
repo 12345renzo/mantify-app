@@ -18,6 +18,7 @@ import {
 import { IconoAtras, IconoEmpresa } from "@/shared/ui/iconos";
 import { Encabezado, Esqueleto } from "../../encabezado";
 import { AccionesFila } from "../acciones-fila";
+import { BotonRespaldo } from "@/modules/reportes/ui/boton-respaldo";
 import { CuentasEmpresa } from "./cuentas-empresa";
 
 export const metadata: Metadata = { title: "Empresa" };
@@ -91,6 +92,7 @@ async function Detalle({ params }: { params: Promise<{ id: string }> }) {
             RUC {empresa.ruc} · Plan {plan?.nombre ?? "—"}
           </span>
         }
+        acciones={<BotonRespaldo empresaId={empresa.id} />}
       />
 
       <div className="grid gap-6 lg:grid-cols-3">

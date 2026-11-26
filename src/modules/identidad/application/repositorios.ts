@@ -26,6 +26,7 @@ export type CuentaInfo = {
   rol: string;
   personaId: string | null;
   correo: string;
+  activa: boolean;
 };
 
 export interface PersonasRepositorio {
@@ -60,6 +61,8 @@ export interface CuentasRepositorio {
     correo: string,
   ): Promise<Result<void>>;
   cambiarRol(id: string, rol: RolEmpresa): Promise<Result<void>>;
+  // Deja la cuenta INACTIVA, suelta a su persona y vence sus sesiones (una transacción en la base).
+  desactivar(id: string): Promise<Result<void>>;
   marcarClaveCambiada(): Promise<Result<void>>;
 }
 
@@ -71,6 +74,7 @@ export interface ServicioAuth {
     id: string,
     correo: string,
   ): Promise<Result<{ clave: string }>>;
+  // Reautenticación antes de una acción sensible (respaldo del superadmin).
   verificarClave(correo: string, clave: string): Promise<boolean>;
   cambiarMiClave(nueva: string): Promise<Result<void>>;
 }

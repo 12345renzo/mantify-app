@@ -69,17 +69,14 @@ export const cambiarRolSchema = z.object({
 
 export const darBajaSchema = z.object({ personaId: z.uuid() });
 
+export const cuentaIdSchema = z.object({ cuentaId: z.uuid() });
+
 export const cambiarClaveSchema = z
   .object({
-    actual: z.string().min(1, "Escribe tu contraseña actual.").max(200),
     nueva: z.string().min(12, "Mínimo 12 caracteres.").max(200),
     repetir: z.string(),
   })
   .refine((d) => d.nueva === d.repetir, {
     message: "No coincide con la nueva contraseña.",
     path: ["repetir"],
-  })
-  .refine((d) => d.nueva !== d.actual, {
-    message: "Debe ser distinta de la actual.",
-    path: ["nueva"],
   });

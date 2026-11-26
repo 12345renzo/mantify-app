@@ -9,7 +9,9 @@ declare
   ua_plan uuid := gen_random_uuid(); ua_ger uuid := gen_random_uuid(); ua_tec uuid := gen_random_uuid();
   ub_plan uuid := gen_random_uuid();
   s_plan uuid := gen_random_uuid(); s_ger uuid := gen_random_uuid(); s_tec uuid := gen_random_uuid();
-  s_tec2 uuid := gen_random_uuid();
+  s_tec2 uuid := gen_random_uuid(); s_ger2 uuid := gen_random_uuid();
+  pa_libre2 uuid; pa_plan2 uuid; ua_plan2 uuid := gen_random_uuid();
+  c1 uuid := '00000000-0000-0000-0000-000000000101'; c2 uuid := '00000000-0000-0000-0000-000000000102';
   v_res text := '';
   v_n int;
   v_txt text;
@@ -68,11 +70,11 @@ begin
   v_res := v_res || format('4c ve %s cuentas de B (esperado 0); ', v_n);
   select count(*) into v_n from public.empresas;
   v_res := v_res || format('4d ve %s empresas (esperado 1, la suya); ', v_n);
-  -- 5. No puede crear planificadores ni escribir en B
+  -- 5. No crea cuentas ni personas en B
   begin
-    insert into public.usuarios (id, empresa_id, rol, correo) values (ua_plan, a, 'PLANIFICADOR', 'x@x.pe');
-    v_res := v_res || '5 FALLA planificador creó planificador; ';
-  exception when insufficient_privilege then v_res := v_res || '5 ok no crea planificador; ';
+    insert into public.usuarios (id, empresa_id, rol, correo) values (gen_random_uuid(), b, 'TECNICO', 'x@x.pe');
+    v_res := v_res || '5 FALLA creó cuenta en B; ';
+  exception when insufficient_privilege then v_res := v_res || '5 ok no crea cuenta en B; ';
   end;
   begin
     insert into public.personas (empresa_id, nombres, apellidos) values (b, 'X', 'Y');
@@ -170,6 +172,79 @@ begin
     v_res := v_res || '12 FALLA cuenta 11 aceptada; ';
   exception when sqlstate 'MT001' then v_res := v_res || '12 ok cuenta 11 rechazada por cupo; ';
   end;
+
+  -- 13. Desactivar y reactivar cuentas (corte de cuentas activas/inactivas). A vuelve a estar al día.
+  update public.membresias set fecha_inicio = current_date, fecha_fin = current_date + 29 where empresa_id = a;
+  insert into public.personas (empresa_id, nombres, apellidos) values (a, 'Lia', 'Libre') returning id into pa_libre2;
+  insert into public.personas (empresa_id, nombres, apellidos) values (a, 'Pablo', 'Plan Dos') returning id into pa_plan2;
+  perform set_config('request.jwt.claims', format('{"sub":"%s","role":"authenticated","session_id":"%s"}', ua_plan, s_plan), true);
+  execute 'set local role authenticated';
+  perform public.desactivar_cuenta(c1);
+  execute 'reset role';
+  select format('%s/%s', estado, coalesce(persona_id::text, 'null')) into v_txt from public.usuarios where id = c1;
+  select count(*) into v_n from public.usuarios where empresa_id = a and estado = 'ACTIVA';
+  v_res := v_res || format('13 desactivada: %s, activas %s (esperado INACTIVA/null, 9); ', v_txt, v_n);
+  insert into auth.users (id, email) values ('00000000-0000-0000-0000-000000000111', 'c11b@x.pe');
+  insert into public.usuarios (id, empresa_id, rol, correo) values ('00000000-0000-0000-0000-000000000111', a, 'TECNICO', 'c11b@x.pe');
+  v_res := v_res || '13b ok la inactiva no ocupa cupo; ';
+  execute 'set local role authenticated';
+  begin
+    perform public.asignar_persona(c1, pa_libre2, 'c1b@x.pe');
+    v_res := v_res || '13c FALLA reactivó sin cupo; ';
+  exception when sqlstate 'MT001' then v_res := v_res || '13c ok reactivar sin cupo rechazado; ';
+  end;
+  perform public.desactivar_cuenta(ua_ger);
+  execute 'reset role';
+  select coalesce(persona_id::text, 'null') into v_txt from public.usuarios where id = ua_ger;
+  v_res := v_res || format('13d persona liberada: %s (esperado null); ', v_txt);
+  insert into auth.sessions (id, user_id) values (s_ger2, ua_ger);
+  perform set_config('request.jwt.claims', format('{"sub":"%s","role":"authenticated","session_id":"%s"}', ua_ger, s_ger2), true);
+  select format('%s/%s', habilitado, motivo) into v_txt from public.mi_acceso();
+  v_res := v_res || format('13e inactiva con sesión nueva: %s (esperado f/CUENTA_INACTIVA); ', v_txt);
+  perform set_config('request.jwt.claims', format('{"sub":"%s","role":"authenticated","session_id":"%s"}', ua_plan, s_plan), true);
+  execute 'set local role authenticated';
+  perform public.asignar_persona(c1, pa_ger, 'c1b@x.pe');
+  execute 'reset role';
+  select format('%s/%s/%s', estado, persona_id = pa_ger, debe_cambiar_clave) into v_txt from public.usuarios where id = c1;
+  v_res := v_res || format('13f reactivada: %s (esperado ACTIVA/true/true); ', v_txt);
+
+  -- 14. Nadie desactiva su propia cuenta
+  execute 'set local role authenticated';
+  begin
+    perform public.desactivar_cuenta(ua_plan);
+    v_res := v_res || '14 FALLA se desactivó a sí mismo; ';
+  exception when sqlstate 'P0002' then v_res := v_res || '14 ok no se desactiva a sí mismo; ';
+  end;
+
+  -- 15. El planificador crea, cambia de rol y desactiva a otro planificador
+  perform public.desactivar_cuenta(c2);
+  execute 'reset role';
+  insert into auth.users (id, email) values (ua_plan2, 'p2.a@x.pe');
+  execute 'set local role authenticated';
+  insert into public.usuarios (id, empresa_id, persona_id, rol, correo) values (ua_plan2, a, pa_plan2, 'PLANIFICADOR', 'p2.a@x.pe');
+  update public.usuarios set rol = 'GERENTE' where id = ua_plan2;
+  get diagnostics v_n = row_count;
+  update public.usuarios set rol = 'PLANIFICADOR' where id = ua_plan2;
+  perform public.desactivar_cuenta(ua_plan2);
+  execute 'reset role';
+  select estado into v_txt from public.usuarios where id = ua_plan2;
+  v_res := v_res || format('15 crea, cambia rol (%s fila) y desactiva planificador: %s (esperado 1, INACTIVA); ', v_n, v_txt);
+
+  -- 16. Último planificador activo (B solo tiene uno): nadie salvo el superadmin lo quita
+  perform set_config('request.jwt.claims', format('{"sub":"%s","role":"authenticated"}', ua_plan), true);
+  begin
+    update public.usuarios set estado = 'INACTIVA', persona_id = null where id = ub_plan;
+    v_res := v_res || '16 FALLA quitó al último planificador; ';
+  exception when sqlstate 'MT006' then v_res := v_res || '16 ok último planificador protegido al desactivar; ';
+  end;
+  begin
+    update public.usuarios set rol = 'GERENTE' where id = ub_plan;
+    v_res := v_res || '16b FALLA cambió de rol al último planificador; ';
+  exception when sqlstate 'MT006' then v_res := v_res || '16b ok último planificador protegido al cambiar rol; ';
+  end;
+  perform set_config('request.jwt.claims', format('{"sub":"%s","role":"authenticated","app_metadata":{"rol":"SUPERADMIN"}}', gen_random_uuid()), true);
+  update public.usuarios set estado = 'INACTIVA', persona_id = null where id = ub_plan;
+  v_res := v_res || '16c ok el superadmin sí puede; ';
 
   raise exception 'RESULTADOS (todo revertido): %', v_res;
 end $$;

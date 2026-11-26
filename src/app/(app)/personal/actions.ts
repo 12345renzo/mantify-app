@@ -8,10 +8,12 @@ import { crearPersona } from "@/modules/identidad/application/crear-persona";
 import { crearUsuario } from "@/modules/identidad/application/crear-usuario";
 import { editarPersona } from "@/modules/identidad/application/editar-persona";
 import { darDeBajaPersona } from "@/modules/identidad/application/dar-de-baja-persona";
+import { desactivarCuenta } from "@/modules/identidad/application/desactivar-cuenta";
 import {
   asignarPersonaSchema,
   cambiarRolSchema,
   crearCuentaSchema,
+  cuentaIdSchema,
   darBajaSchema,
   personaSchema,
 } from "@/modules/identidad/application/esquemas";
@@ -54,7 +56,7 @@ const MENSAJES_CUENTA = {
   CONFLICT:
     "Ese correo ya tiene una cuenta, o la persona elegida ya tiene una.",
   LIMIT:
-    "Llegaste al límite de cuentas de tu plan. Asigna una cuenta libre en lugar de crear otra.",
+    "Llegaste al límite de cuentas de tu plan. Asigna una cuenta libre o desactiva una que no se use.",
   FORBIDDEN: "No puedes crear ni cambiar cuentas con ese rol.",
 } as const;
 
@@ -268,4 +270,28 @@ export async function cambiarRolAction(
   }
   refresh();
   return { exito: "Rol actualizado." };
+}
+
+export async function desactivarCuentaAction(
+  _previo: EstadoIdentidad,
+  fd: FormData,
+): Promise<EstadoIdentidad> {
+  const datos = cuentaIdSchema.safeParse({ cuentaId: fd.get("cuentaId") });
+  if (!datos.success) return { error: "Cuenta no válida." };
+  const r = await desactivarCuenta(
+    await obtenerActor(),
+    datos.data,
+    await reposIdentidad(),
+  );
+  if (!r.ok) {
+    return {
+      error: mensajeError(r.error, {
+        FORBIDDEN: "No puedes desactivar esta cuenta.",
+        CONFLICT: "La cuenta ya está inactiva.",
+        NOT_FOUND: "La cuenta ya está inactiva o no existe. Recarga la página.",
+      }),
+    };
+  }
+  refresh();
+  return { exito: "Cuenta desactivada. Su persona quedó libre." };
 }

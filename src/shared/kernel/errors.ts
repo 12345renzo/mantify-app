@@ -8,6 +8,8 @@ export const DOMAIN_ERROR_CODES = [
   "LIMIT",
   // Un catálogo que usa un registro activo (p. ej. categoría con equipos).
   "EN_USO",
+  // Quitar al último planificador activo de una empresa.
+  "SIN_PLANIFICADOR",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

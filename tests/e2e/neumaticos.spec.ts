@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { claveDe } from "./claves";
 
 // Flujo del corte 9 en la empresa de prueba (E2E_PLAN, E2E_SUP, E2E_TEC con E2E_CLAVE):
 // planificador define umbrales del equipo, carga dos cubiertas y posiciones → técnico monta, mide
@@ -7,20 +8,28 @@ import { expect, test, type Page } from "@playwright/test";
 const PLAN = process.env.E2E_PLAN ?? "e2e.plan@prueba.pe";
 const SUP = process.env.E2E_SUP ?? "e2e.sup@prueba.pe";
 const TEC = process.env.E2E_TEC ?? "e2e.tec@prueba.pe";
-const CLAVE = process.env.E2E_CLAVE ?? "";
 const EQUIPO = process.env.E2E_EQUIPO_NEUMATICOS ?? "E2E01";
 const MOTIVO = "Desgaste E2E";
 
-test.skip(!CLAVE, "Falta E2E_CLAVE");
+test.skip(!claveDe(TEC), "Faltan las claves E2E_CLAVE_*");
 
 async function entrar(page: Page, correo: string) {
   await page.context().clearCookies();
   await page.goto("/login");
   await page.getByLabel("Correo").fill(correo);
-  await page.getByLabel("Contraseña", { exact: true }).fill(CLAVE);
+  await page.getByLabel("Contraseña", { exact: true }).fill(claveDe(correo));
   await page.getByRole("button", { name: "Ingresar" }).click();
   await page.waitForURL("**/inicio");
   await page.waitForLoadState("networkidle");
+}
+
+// Las listas paginan de a 5 y cada corrida suma cubiertas: busca la página donde está la fila.
+async function irAFila(page: Page, url: string, texto: string) {
+  for (let n = 1; n <= 30; n++) {
+    await ir(page, `${url}&pagina=${n}`);
+    if (await page.locator("tbody tr", { hasText: texto }).count()) return;
+  }
+  throw new Error(`${texto} no aparece en ${url}`);
 }
 
 async function ir(page: Page, url: string) {
@@ -101,7 +110,7 @@ test("umbrales → cargar → posiciones → montar → medir → rotar → desm
     await dlg.getByLabel(/Costo/).fill("1200");
     await guardar(page, "Nueva cubierta", "Guardar");
   }
-  await ir(page, "/neumaticos?vista=stock");
+  await irAFila(page, "/neumaticos?vista=stock", C1);
   await expect(page.locator("tbody tr", { hasText: C1 })).toBeVisible();
 
   // 3. Posiciones del equipo.
@@ -120,7 +129,9 @@ test("umbrales → cargar → posiciones → montar → medir → rotar → desm
   await expect(
     page.getByRole("button", { name: "Nueva cubierta" }),
   ).toHaveCount(0);
-  await expect(page.getByText("Costo por hora")).toHaveCount(0);
+  await expect(
+    page.getByRole("columnheader", { name: "Costo por hora" }),
+  ).toHaveCount(0);
   await irAlMapa(page);
   for (const [pos, codigo] of [
     ["DEL-I", C1],
@@ -167,7 +178,7 @@ test("umbrales → cargar → posiciones → montar → medir → rotar → desm
 
   // 8. Supervisor: no ve umbrales; recapa y la cubierta vuelve a stock.
   await entrar(page, SUP);
-  await ir(page, "/neumaticos?vista=otros");
+  await irAFila(page, "/neumaticos?vista=otros", C1);
   await expect(page.getByRole("button", { name: "Umbrales" })).toHaveCount(0);
   await page
     .locator("tbody tr", { hasText: C1 })
@@ -177,6 +188,6 @@ test("umbrales → cargar → posiciones → montar → medir → rotar → desm
   await rec.getByLabel("Cocada nueva (mm)").fill("16");
   await rec.getByLabel(/Costo del recapado/).fill("300");
   await guardar(page, `Recapar ${C1}`, "Registrar recapado");
-  await ir(page, "/neumaticos?vista=stock");
+  await irAFila(page, "/neumaticos?vista=stock", C1);
   await expect(page.locator("tbody tr", { hasText: C1 })).toBeVisible();
 });

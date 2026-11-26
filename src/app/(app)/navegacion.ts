@@ -165,7 +165,9 @@ export const NAVEGACION: GrupoNav[] = [
         descripcion: "Dashboard, PDF y Excel.",
         icono: IconoReporte,
         color: "var(--mod-reportes)",
-        corte: 10,
+        href: "/reportes",
+        // Exportar = leer "reportes"; el técnico no exporta.
+        roles: ["PLANIFICADOR", "SUPERVISOR", "GERENTE"],
       },
     ],
   },

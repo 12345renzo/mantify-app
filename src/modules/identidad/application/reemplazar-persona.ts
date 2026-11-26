@@ -2,6 +2,7 @@ import type { Actor } from "@/shared/kernel/actor";
 import { DomainError } from "@/shared/kernel/errors";
 import { err, ok, type Result } from "@/shared/kernel/result";
 import { rolesQuePuedeGestionar } from "../domain/permisos";
+import { hayCupo } from "../domain/reglas-persona-cuenta";
 import { empresaDeTrabajo, exigirPermiso } from "./acceso";
 import { resolverPersonaParaCuenta } from "./crear-persona";
 import type { PersonaEntrada } from "./esquemas";
@@ -11,7 +12,8 @@ import type {
   ServicioAuth,
 } from "./repositorios";
 
-// Asigna una cuenta libre (su persona fue dada de baja) a otra persona, con correo y clave nuevos.
+// Asigna una cuenta sin persona a otra, con correo y clave nuevos. Sirve para la cuenta libre
+// (su persona fue dada de baja) y para reactivar una cuenta inactiva, que vuelve a ocupar cupo.
 export async function reemplazarPersona(
   actor: Actor | null,
   entrada: {
@@ -45,6 +47,10 @@ export async function reemplazarPersona(
   }
   if (c.personaId)
     return err(new DomainError("CONFLICT", "la cuenta ya tiene persona"));
+  // Se revisa antes de tocar credenciales; la base lo vuelve a revisar al reactivar (MT001).
+  if (!c.activa && !hayCupo(await repos.cuentas.cupo(empresa.value))) {
+    return err(new DomainError("LIMIT", "sin cupo para reactivar"));
+  }
 
   const persona = await resolverPersonaParaCuenta(
     quien,
